@@ -1,6 +1,7 @@
 ---
-# Step 1 : Confirm is dual routing engine or ringle routing engine.
-# Step 2 : Perform upgrade based on the above
+# Step 1 : Collect device ansible facts to determine if dual routing engine or not
+# Step 2 : Perform upgrade steps based on the above
+
 - name: Gather Junos-specific facts
   junipernetworks.junos.junos_facts:
     gather_subset:
@@ -18,37 +19,26 @@
   ansible.builtin.debug:
     var: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
-# - name: Run 'show chassis routing-engine' to check the number of REs
-#   junipernetworks.junos.junos_command:
-#     commands:
-#       - 'show chassis routing-engine'
-#   register: re_output
 
-# - name: Debug output
-#   ansible.builtin.debug:
-#     var: re_output
+# Tasks for devices with dual Routing Engines
+- block:
+    - name: dual routing engine test task
+      ansible.builtin.debug:
+        msg:
+          - "Device has dual routing engines."
+      ignore_errors: true
+      delegate_to: localhost
 
-# - name: Debug output
-#   ansible.builtin.debug:
-#     var: re_output["stdout"]["Routing Engine Status"]
+  when: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
-# - name: Parse the output to count Routing Engines
-#   ansible.builtin.set_fact:
-#     re_count: "{{ re_output.stdout_lines | select('match', 'Routing Engine') | list | length }}"
+# Tasks for devices with a single Routing Engine
+- block:
+    - name: single routing engine test task
+      ansible.builtin.debug:
+        msg:
+          - "Device has single routing engine."
+      ignore_errors: true
+      delegate_to: localhost
 
-# - name: Display the number of detected Routing Engines
-#   ansible.builtin.debug:
-#     msg: "Number of Routing Engines: {{ re_count }}"
 
-# Task for devices with dual Routing Engines
-# - name: Tasks for dual Routing Engines
-#   ansible.builtin.import_tasks: dual-routing-engine.yml
-#   when:
-#     - "'Slot 0:' in re_output['stdout'][0]"
-#     - "'Slot 1:' in re_output['stdout'][1]"
-
-# # Task for devices with a single Routing Engine
-# - name: Tasks for single Routing Engines
-#   ansible.builtin.import_tasks: single-routing-engine.yml
-#   when:
-#     - "'Slot 1:' not in re_output['stdout'][1]"
+  when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
