@@ -5,15 +5,15 @@
 - name: Gather Junos-specific facts
   junipernetworks.junos.junos_facts:
     gather_subset:
-      - hardware       # Hardware-related facts like chassis info
+      - hardware        # Hardware-related facts like chassis info
       #- config         # Configuration information
       #- interfaces     # Interface details
-      - default        # Junos OS version
+      - default         # default values
   register: junos_facts
 
-- name: Display gathered Junos facts
-  ansible.builtin.debug:
-    var: junos_facts.ansible_facts
+# - name: Display gathered Junos facts
+#   ansible.builtin.debug:
+#     var: junos_facts.ansible_facts
 
 - name: Display ansible_net_has_2RE value
   ansible.builtin.debug:
