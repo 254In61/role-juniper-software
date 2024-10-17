@@ -8,9 +8,7 @@
       #- config         # Configuration information
       #- interfaces     # Interface details
       - default        # Junos OS version
-  register: junos_facts_output
-
-
+  register: junos_facts
 
 - name: Display gathered Junos facts
   ansible.builtin.debug:
