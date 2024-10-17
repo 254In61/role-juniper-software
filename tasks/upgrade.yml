@@ -7,7 +7,7 @@
       - hardware       # Hardware-related facts like chassis info
       - config         # Configuration information
       - interfaces     # Interface details
-      - version        # Junos OS version
+      - default        # Junos OS version
   register: junos_facts_output
 
 - name: Display all gathered facts
