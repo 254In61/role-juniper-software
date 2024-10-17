@@ -3,11 +3,11 @@
 # Step 2 : Perform upgrade based on the above
 - name: Gather facts from Juniper device
   junipernetworks.junos.junos_facts:
-    # gather_subset:
-    #       - hardware       # Hardware-related facts like chassis info
-    #       - config         # Configuration information
-    #       - interfaces     # Interface details
-    #       - version        # Junos OS version
+    gather_subset:
+      - hardware       # Hardware-related facts like chassis info
+      - config         # Configuration information
+      - interfaces     # Interface details
+      - version        # Junos OS version
   register: junos_facts_output
 
 - name: Display all gathered facts
