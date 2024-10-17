@@ -5,8 +5,12 @@
 - name: Run 'show chassis routing-engine' to check the number of REs
   junipernetworks.junos.junos_command:
     commands:
-      - show chassis routing-engine
+      - show chassis routing-engine | grep Slot
   register: re_output
+
+- name: Debug output
+  ansible.builtin.debug:
+    var: re_output
 
 - name: Parse the output to count Routing Engines
   ansible.builtin.set_fact:
