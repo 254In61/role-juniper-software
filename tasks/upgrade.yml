@@ -5,8 +5,8 @@
   junipernetworks.junos.junos_facts:
     gather_subset:
       - hardware       # Hardware-related facts like chassis info
-      - config         # Configuration information
-      - interfaces     # Interface details
+      #- config         # Configuration information
+      #- interfaces     # Interface details
       - default        # Junos OS version
   register: junos_facts_output
 
