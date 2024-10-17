@@ -2,7 +2,7 @@
 # Step 1 : Confirm is dual routing engine or ringle routing engine.
 # Step 2 : Perform upgrade based on the above
 
-- name: Run 'show chassis routing-engine' to check the number of REs
+- name: Run 'show chassis routing-engine | grep Slot' to check the number of REs
   junipernetworks.junos.junos_command:
     commands:
       - show chassis routing-engine | grep Slot
