@@ -24,12 +24,11 @@
 - name: Tasks for dual Routing Engines
   ansible.builtin.import_tasks: dual-routing-engine.yml
   when:
-    - "'Slot 0:' in re_output['stdout']"
-    - "'Slot 1:' in re_output['stdout']"
+    - "'Slot 0:' in re_output['stdout'][0]"
+    - "'Slot 1:' in re_output['stdout'][1]"
 
 # Task for devices with a single Routing Engine
 - name: Tasks for single Routing Engines
   ansible.builtin.import_tasks: single-routing-engine.yml
   when:
-    - "'Slot 0' in re_output['stdout']"
-    - "'Slot 1' not in re_output['stdout']"
+    - "'Slot 1:' not in re_output['stdout'][1]"
