@@ -14,9 +14,9 @@
   ansible.builtin.debug:
     var: junos_facts.ansible_facts
 
-# - name: Display all hardware facts
-#   ansible.builtin.debug:
-#     var: ansible_facts.hardware
+- name: Display ansible_net_has_2RE value
+  ansible.builtin.debug:
+    var: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
 # - name: Run 'show chassis routing-engine' to check the number of REs
 #   junipernetworks.junos.junos_command:
