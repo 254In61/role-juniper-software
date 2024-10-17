@@ -3,3 +3,5 @@
   ansible.builtin.debug:
     msg:
       - "Device has single routing engine."
+  ignore_errors: true
+  delegate_to: localhost

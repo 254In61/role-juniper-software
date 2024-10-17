@@ -1,16 +1,33 @@
 ---
 # Step 1 : Confirm is dual routing engine or ringle routing engine.
 # Step 2 : Perform upgrade based on the above
+- name: Gather facts from Juniper device
+  junipernetworks.junos.junos_facts:
+    # gather_subset:
+    #       - hardware       # Hardware-related facts like chassis info
+    #       - config         # Configuration information
+    #       - interfaces     # Interface details
+    #       - version        # Junos OS version
+  register: junos_facts_output
 
-- name: Run 'show chassis routing-engine' to check the number of REs
-  junipernetworks.junos.junos_command:
-    commands:
-      - 'show chassis routing-engine'
-  register: re_output
+- name: Display all gathered facts
+  debug:
+    var: junos_facts_output.ansible_facts
 
-- name: Debug output
-  ansible.builtin.debug:
-    var: re_output
+
+# - name: Run 'show chassis routing-engine' to check the number of REs
+#   junipernetworks.junos.junos_command:
+#     commands:
+#       - 'show chassis routing-engine'
+#   register: re_output
+
+# - name: Debug output
+#   ansible.builtin.debug:
+#     var: re_output
+
+# - name: Debug output
+#   ansible.builtin.debug:
+#     var: re_output["stdout"]["Routing Engine Status"]
 
 # - name: Parse the output to count Routing Engines
 #   ansible.builtin.set_fact:
@@ -21,14 +38,14 @@
 #     msg: "Number of Routing Engines: {{ re_count }}"
 
 # Task for devices with dual Routing Engines
-- name: Tasks for dual Routing Engines
-  ansible.builtin.import_tasks: dual-routing-engine.yml
-  when:
-    - "'Slot 0:' in re_output['stdout'][0]"
-    - "'Slot 1:' in re_output['stdout'][1]"
+# - name: Tasks for dual Routing Engines
+#   ansible.builtin.import_tasks: dual-routing-engine.yml
+#   when:
+#     - "'Slot 0:' in re_output['stdout'][0]"
+#     - "'Slot 1:' in re_output['stdout'][1]"
 
-# Task for devices with a single Routing Engine
-- name: Tasks for single Routing Engines
-  ansible.builtin.import_tasks: single-routing-engine.yml
-  when:
-    - "'Slot 1:' not in re_output['stdout'][1]"
+# # Task for devices with a single Routing Engine
+# - name: Tasks for single Routing Engines
+#   ansible.builtin.import_tasks: single-routing-engine.yml
+#   when:
+#     - "'Slot 1:' not in re_output['stdout'][1]"
