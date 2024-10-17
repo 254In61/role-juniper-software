@@ -5,7 +5,7 @@
 - name: Run 'show chassis routing-engine | grep Slot' to check the number of REs
   junipernetworks.junos.junos_command:
     commands:
-      - show chassis routing-engine | grep Slot
+      - 'show chassis routing-engine | grep Slot'
   register: re_output
 
 - name: Debug output
