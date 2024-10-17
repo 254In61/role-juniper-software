@@ -1,22 +1,24 @@
 ---
 # Step 1 : Confirm is dual routing engine or ringle routing engine.
 # Step 2 : Perform upgrade based on the above
-# - name: Gather facts from Juniper device
-#   junipernetworks.junos.junos_facts:
-#     gather_subset:
-#       - hardware       # Hardware-related facts like chassis info
-#       #- config         # Configuration information
-#       #- interfaces     # Interface details
-#       - default        # Junos OS version
-#   register: junos_facts_output
+- name: Gather Junos-specific facts
+  junipernetworks.junos.junos_facts:
+    gather_subset:
+      - hardware       # Hardware-related facts like chassis info
+      #- config         # Configuration information
+      #- interfaces     # Interface details
+      - default        # Junos OS version
+  register: junos_facts_output
 
-- name: Display all gathered facts
-  ansible.builtin.debug:
-    var: ansible_facts
 
-- name: Display all hardware facts
+
+- name: Display gathered Junos facts
   ansible.builtin.debug:
-    var: ansible_facts.hardware
+    var: junos_facts.ansible_facts
+
+# - name: Display all hardware facts
+#   ansible.builtin.debug:
+#     var: ansible_facts.hardware
 
 # - name: Run 'show chassis routing-engine' to check the number of REs
 #   junipernetworks.junos.junos_command:
