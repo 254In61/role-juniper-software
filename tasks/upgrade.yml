@@ -11,9 +11,12 @@
 #   register: junos_facts_output
 
 - name: Display all gathered facts
-  debug:
+  ansible.builtin.debug:
     var: ansible_facts
 
+- name: Display all hardware facts
+  ansible.builtin.debug:
+    var: ansible_facts.hardware
 
 # - name: Run 'show chassis routing-engine' to check the number of REs
 #   junipernetworks.junos.junos_command:
