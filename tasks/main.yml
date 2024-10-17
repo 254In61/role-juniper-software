@@ -1,0 +1,5 @@
+---
+# Main tasks
+- name: Import upgrade tasks
+  ansible.builtin.import_tasks: upgrade.yml
+  when: upgrade | bool

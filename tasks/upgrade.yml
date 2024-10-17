@@ -1,0 +1,27 @@
+---
+# Step 1 : Confirm is dual routing engine or ringle routing engine.
+# Step 2 : Perform upgrade based on the above
+
+- name: Run 'show chassis routing-engine' to check the number of REs
+  junipernetworks.junos.junos_command:
+    commands:
+      - show chassis routing-engine
+  register: re_output
+
+- name: Parse the output to count Routing Engines
+  ansible.builtin.set_fact:
+    re_count: "{{ re_output.stdout_lines | select('match', 'Routing Engine') | list | length }}"
+
+- name: Display the number of detected Routing Engines
+  ansible.builtin.debug:
+    msg: "Number of Routing Engines: {{ re_count }}"
+
+# Task for devices with dual Routing Engines
+- name: Tasks for dual Routing Engines
+  ansible.builtin.import_tasks: dual-routing-engine.yml
+  when: re_count == 2
+
+# Task for devices with a single Routing Engine
+- name: Tasks for single Routing Engines
+  ansible.builtin.import_tasks: single-routing-engine.yml
+  when: re_count == 1

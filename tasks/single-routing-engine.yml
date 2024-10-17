@@ -1,0 +1,5 @@
+---
+- name: Test debug message
+  ansible.builtin.debug:
+    msg:
+      - "Device has single routing engine."

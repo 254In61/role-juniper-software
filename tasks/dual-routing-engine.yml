@@ -1,0 +1,6 @@
+---
+- name: Test debug message
+  ansible.builtin.debug:
+    msg:
+      - "Device has dual routing engines."
+  
