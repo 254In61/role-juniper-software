@@ -1,5 +1,5 @@
 ---
-- name: Test debug message
+- name: single routing engine test task
   ansible.builtin.debug:
     msg:
       - "Device has single routing engine."
