@@ -40,7 +40,7 @@
 - name: Upload OS image to the Juniper device
   junipernetworks.junos.junos_scp:
     src: "{{ sw_image_file_path }}"
-    dest: "{{ junos_device_file_path }}"
+    dest: "{{ juniper_device_tmp_storage }}"
     timeout: 1800 # Is 1 hr an overkill?
   register: upload_result
 
