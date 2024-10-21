@@ -70,10 +70,21 @@
 #     ansible_connection: ansible.netcommon.network_cli
 #   register: upload_result
 
-- name: Scp file from ansible controller to the juniper device
-  ansible.builtin.shell: |
-    sshpass -p "{{ ansible_password }}" scp {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
+# Failed to connect
+# - name: Scp file from ansible controller to the juniper device
+#   ansible.builtin.shell: |
+#     sshpass -p "{{ ansible_password }}" scp {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
+#   register: upload_result
+
+- name: Upload OS image to the Juniper device
+  junipernetworks.junos.junos_package:
+    src: "{{ sw_image_file_path }}"
+    # dest: "{{ juniper_device_tmp_storage }}"
+    host: "{{ inventory_hostname }}"
+    reboot: false
+    # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
   register: upload_result
+
 
 - name: Debug upload result
   ansible.builtin.debug:
