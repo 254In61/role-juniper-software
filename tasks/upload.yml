@@ -35,21 +35,11 @@
 
 # Step 2 : Upload image to the device
 
-# - name: Check if image already existing on the device # Will it matter? Unless we worry about space?
-# Added to the exec-env instead
-# - name: Install junos-eznc
-#   ansible.builtin.pip:
-#     name: junos-eznc
-#     state: present
-#   delegate_to: localhost
-#   ignore_errors: yes
-
 # ISSUES HERE!
 # 1, junos-eznc missing.. fixed with image rebuild.
 # 2. timeout .. not a valid parameter!..Well? It is in the documentation!
 # 3. host .. Needed when not missing! ..But when added, it is not a valid parameter!..Yet it is in the documentation..ghhhhhrr
 # Looks like module is deprecated! https://docs.ansible.com/ansible/latest/collections/junipernetworks/junos/junos_scp_module.html#ansible-collections-junipernetworks-junos-junos-scp-module
-
 
 # - name: Upload OS image to the Juniper device
 #   junipernetworks.junos.junos_scp:
@@ -60,15 +50,13 @@
 #   register: upload_result
 
 # Socket issue here
-# - name: copy file from ansible controller to a network device
-#   ansible.netcommon.net_put:
-#     src: "{{ sw_image_file_path }}"
-#     dest: "{{ juniper_device_tmp_storage }}"
-#     # host: "{{ inventory_hostname }}"
-#     # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
-#   vars:
-#     ansible_connection: ansible.netcommon.network_cli
-#   register: upload_result
+- name: copy file from ansible controller to a network device
+  ansible.netcommon.net_put:
+    src: "{{ sw_image_file_path }}"
+    dest: "{{ juniper_device_tmp_storage }}"
+  vars:
+    ansible_connection: ansible.netcommon.network_cli
+  register: upload_result
 
 # Failed to connect
 # - name: Scp file from ansible controller to the juniper device
@@ -76,6 +64,7 @@
 #     sshpass -p "{{ ansible_password }}" scp {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
 #   register: upload_result
 
+# You must provide either 'host' or 'sock_fd' value..what theeeee fuuuuckk???.. And yet these values are said to be invalid when called!ghhhhrrr
 - name: Upload OS image to the Juniper device
   junipernetworks.junos.junos_package:
     src: "{{ sw_image_file_path }}"
