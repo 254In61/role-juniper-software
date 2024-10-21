@@ -76,7 +76,7 @@
 #   register: upload_result
 
 - name: Generate SSH Key
-  ansible.builtin.openssh_keypair:
+  community.crypto.openssh_keypair:
     path: "{{ ssh_key_path }}"
     state: present
   register: ssh_key
