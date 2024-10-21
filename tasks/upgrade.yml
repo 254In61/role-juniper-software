@@ -1,6 +1,9 @@
 ---
-# Step 1 : Collect device ansible facts to determine if dual routing engine or not
-# Step 2 : Perform upgrade steps based on the above
+
+# 1. Confirm image is already uploaded on the device
+
+
+# 2. Determine device is single or dual routing engine
 
 - name: Gather Junos-specific facts
   junipernetworks.junos.junos_facts:
@@ -20,7 +23,9 @@
     var: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
 
-# Tasks for devices with dual Routing Engines
+# 3. Perform software upgrade
+
+# 3a. Tasks for devices with dual Routing Engines
 - block:
     - name: dual routing engine test task
       ansible.builtin.debug:
@@ -31,7 +36,7 @@
 
   when: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
-# Tasks for devices with a single Routing Engine
+# 3b. Tasks for devices with a single Routing Engine
 - block:
     - name: single routing engine test task
       ansible.builtin.debug:
@@ -39,6 +44,5 @@
           - "Device has single routing engine."
       ignore_errors: true
       delegate_to: localhost
-
 
   when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false

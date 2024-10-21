@@ -1,5 +1,14 @@
 ---
 # Main tasks
-- name: Import upgrade tasks
+- name: Import upload software image tasks
+  ansible.builtin.import_tasks: upload.yml
+  when: 
+    - upgrade_device == false
+    - upload_image
+
+- name: Import upgrade_device tasks
   ansible.builtin.import_tasks: upgrade.yml
-  when: upgrade | bool
+  when: 
+    - upgrade_device
+    - upload_image == false
+
