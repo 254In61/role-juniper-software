@@ -14,7 +14,7 @@
 
 
 - name: Set facts
-  ansible.buitin.set_fact:
+  ansible.builtin.set_fact:
     sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
   delegate_to: localhost
 
