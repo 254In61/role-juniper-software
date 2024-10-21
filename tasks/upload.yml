@@ -72,7 +72,7 @@
 
 - name: Scp file from ansible controller to the juniper device
   ansible.builtin.shell: |
-    sshpass -p '{{ ansible_password }}' scp {{ sw_image_file_path }} {{ ansible_username }}@{{ inventory_hostname }}:{{ juniper_device_tmp_storage }}
+    sshpass -p "{{ ansible_password }}" scp -o StrictHostKeyChecking=no {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
   register: upload_result
 
 - name: Debug upload result
