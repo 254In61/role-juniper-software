@@ -37,6 +37,13 @@
 
 # - name: Check if image already existing on the device # Will it matter? Unless we worry about space?
 
+- name: Install junos-eznc
+  ansible.builtin.pip:
+    name: junos-eznc
+    state: present
+  delegate_to: localhost
+  ignore_errors: yes
+
 - name: Upload OS image to the Juniper device
   junipernetworks.junos.junos_scp:
     src: "{{ sw_image_file_path }}"
