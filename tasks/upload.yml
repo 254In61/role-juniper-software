@@ -15,6 +15,7 @@
 - name: Set facts
   ansible.builtin.set_fact:
     sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
+    ssh_key_path: "~/.ssh/id_rsa"
   delegate_to: localhost
 
 - name: "Check if {{ software_image_file_name }} exists on the local"
@@ -50,13 +51,13 @@
 #   register: upload_result
 
 # Socket issue here
-- name: copy file from ansible controller to a network device
-  ansible.netcommon.net_put:
-    src: "{{ sw_image_file_path }}"
-    dest: "{{ juniper_device_tmp_storage }}"
-  # vars:
-  #   ansible_connection: ansible.netcommon.network_cli
-  register: upload_result
+# - name: copy file from ansible controller to a network device
+#   ansible.netcommon.net_put:
+#     src: "{{ sw_image_file_path }}"
+#     dest: "{{ juniper_device_tmp_storage }}"
+#   # vars:
+#   #   ansible_connection: ansible.netcommon.network_cli
+#   register: upload_result
 
 # Failed to connect
 # - name: Scp file from ansible controller to the juniper device
@@ -74,6 +75,30 @@
 #     # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
 #   register: upload_result
 
+- name: Generate SSH Key
+  ansible.builtin.openssh_keypair:
+    path: "{{ ssh_key_path }}"
+    state: present
+  register: ssh_key
+
+- name: Copy public key to the Juniper device
+  ansible.builtin.shell: |
+    sshpass -p "{{ ansible_password }}" ssh-copy-id -i {{ ssh_key_path }}.pub {{ ansible_user }}@{{ ansible_host }}
+  ignore_errors: true
+
+- name: Test SSH access to the Juniper device
+  ansible.builtin.command: ssh {{ ansible_host }} "echo SSH Access OK"
+  register: ssh_test
+  ignore_errors: true
+
+- name: Debug SSH Test Result
+  ansible.builtin.debug:
+    var: ssh_test
+
+- name: Scp file from ansible controller to the juniper device
+  ansible.builtin.shell: |
+    scp {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
+  register: upload_result
 
 - name: Debug upload result
   ansible.builtin.debug:
