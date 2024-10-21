@@ -12,7 +12,6 @@
   run_once: true
   delegate_to: localhost
 
-
 - name: Set facts
   ansible.builtin.set_fact:
     sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
@@ -34,4 +33,17 @@
   delegate_to: localhost
 
 
-# Step 2 : Upload image to the devide
+# Step 2 : Upload image to the device
+
+# - name: Check if image already existing on the device # Will it matter? Unless we worry about space?
+
+- name: Upload OS image to the Juniper device
+  junipernetworks.junos.junos_scp:
+    src: "{{ sw_image_file_path }}"
+    dest: "{{ junos_device_file_path }}"
+    timeout: 1800 # Is 1 hr an overkill?
+  register: upload_result
+
+- name: Debug upload result
+  ansible.builtin.debug:
+    var: upload_result
