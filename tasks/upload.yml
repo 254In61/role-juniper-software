@@ -80,7 +80,7 @@
   junipernetworks.junos.junos_package:
     src: "{{ sw_image_file_path }}"
     # dest: "{{ juniper_device_tmp_storage }}"
-    host: "{{ inventory_hostname }}"
+    # host: "{{ inventory_hostname }}"
     reboot: false
     # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
   register: upload_result
