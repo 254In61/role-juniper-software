@@ -44,13 +44,29 @@
 #   delegate_to: localhost
 #   ignore_errors: yes
 
-- name: Upload OS image to the Juniper device
-  junipernetworks.junos.junos_scp:
+# ISSUES HERE!
+# 1, junos-eznc missing.. fixed with image rebuild.
+# 2. timeout .. not a valid parameter!..Well? It is in the documentation!
+# 3. host .. Needed when not missing! ..But when added, it is not a valid parameter!..Yet it is in the documentation..ghhhhhrr
+# Looks like module is deprecated! https://docs.ansible.com/ansible/latest/collections/junipernetworks/junos/junos_scp_module.html#ansible-collections-junipernetworks-junos-junos-scp-module
+
+
+# - name: Upload OS image to the Juniper device
+#   junipernetworks.junos.junos_scp:
+#     src: "{{ sw_image_file_path }}"
+#     dest: "{{ juniper_device_tmp_storage }}"
+#     host: "{{ inventory_hostname }}"
+#     # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
+#   register: upload_result
+
+- name: copy file from ansible controller to a network device
+  ansible.netcommon.net_put:
     src: "{{ sw_image_file_path }}"
     dest: "{{ juniper_device_tmp_storage }}"
-    host: "{{ inventory_hostname }}"
+    # host: "{{ inventory_hostname }}"
     # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
   register: upload_result
+
 
 - name: Debug upload result
   ansible.builtin.debug:
