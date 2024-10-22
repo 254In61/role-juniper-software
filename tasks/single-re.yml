@@ -13,7 +13,6 @@
     src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
     no_copy: true
     host: "{{ inventory_hostname }}"
-  delegate_to: localhost
   register: upgrade
 
 - name: Debug upgrade results
