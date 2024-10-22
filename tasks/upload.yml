@@ -85,6 +85,7 @@
   community.crypto.openssh_keypair:
     path: "{{ ssh_key_path }}"
     state: present
+    force: true
   register: ssh_key
   delegate_to: localhost
 
