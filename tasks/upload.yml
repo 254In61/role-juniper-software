@@ -86,3 +86,5 @@
     fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
     success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
   delegate_to: localhost
+
+# No need to clean git files since container is ephemeral
