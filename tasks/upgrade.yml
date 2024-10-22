@@ -41,24 +41,12 @@
 
 # 3. Perform software upgrade
 
-# 3a. Tasks for devices with dual Routing Engines
-- block:
-    - name: dual routing engine test task
-      ansible.builtin.debug:
-        msg:
-          - "Device has dual routing engines."
-      ignore_errors: true
-      delegate_to: localhost
-
+# dual routing engines
+- name: Import dual routing engine tasks
+  ansible.builtin.import_tasks: dual-re.yml
   when: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
-# 3b. Tasks for devices with a single Routing Engine
-- block:
-    - name: single routing engine test task
-      ansible.builtin.debug:
-        msg:
-          - "Device has single routing engine."
-      ignore_errors: true
-      delegate_to: localhost
-
+# single routing engines
+- name: Import single routing engine tasks
+  ansible.builtin.import_tasks: single-re.yml
   when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false

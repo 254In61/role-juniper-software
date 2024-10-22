@@ -1,0 +1,19 @@
+---
+# single routing engine upgrade tasks
+
+- name: single routing engine test task
+  ansible.builtin.debug:
+    msg:
+      - "Device has single routing engine."
+  ignore_errors: true
+  delegate_to: localhost
+
+- name: install local package on remote device
+  junipernetworks.junos.junos_package:
+    src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+    no_copy: true
+  register: upgrade
+
+- name: Debug upgrade results
+  ansible.builtin.debug:
+    var: upgrade
