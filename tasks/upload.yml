@@ -37,12 +37,12 @@
 - name: List files
   junipernetworks.junos.junos_command:
     commands: "file list {{ juniper_device_tmp_storage }}"
-  register: file_list["stdout_lines"]
+  register: file_list
   ignore_errors: true
 
 - name: Debug upload result
   ansible.builtin.debug:
-    var: file_list
+    var: file_list["stdout_lines"]
   delegate_to: localhost
 
 
