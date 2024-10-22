@@ -2,8 +2,8 @@
 # Uploading software image to the device
 - name: Set facts
   ansible.builtin.set_fact:
-    # sw_image_file_path: "{{ tmp_root_dir }}/{{ software_image_file_name }}"
-    sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
+    sw_image_file_path: "{{ tmp_root_dir }}/{{ software_image_file_name }}"
+    # sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
   # delegate_to: localhost # Using connection: local
 
 # - name: Clone the os images git artifacts
