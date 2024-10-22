@@ -23,7 +23,10 @@
     ls -al >> {{ sw_image_file_path }}
   delegate_to: localhost
 
-
+- name: Check if the file exists
+  ansible.builtin.stat:
+    path: "{{ sw_image_file_path }}"
+  register: file_check
 
 - name: "Assert {{ software_image_file_name }} exists on the local - FAIL Playbook if NOT existing"
   ansible.builtin.assert:
