@@ -84,7 +84,7 @@
 - name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
   ansible.builtin.assert:
     that:
-      - "{{ software_image_file_name }} in file_list['stdout_lines'][0]"
+      - software_image_file_name in file_list.stdout[0]
     fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
     success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
   delegate_to: localhost
