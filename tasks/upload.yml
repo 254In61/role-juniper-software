@@ -7,10 +7,41 @@
     ssh_key_path: "{{ tmp_root_dir }}/id_rsa"
   delegate_to: localhost
 
+# - name: Clone the os images git artifacts
+#   ansible.builtin.git:
+#     repo: "{{ git_repo_url }}"
+#     dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
+#     version: "{{ git_repo_branch }}"
+#     force: yes       # Still clone down and overwrite incase local repo is existing.
+#   ignore_errors: true
+#   run_once: true
+#   delegate_to: localhost
+
+
 - name: Generate random file
   ansible.builtin.shell: |
     ls -al >> {{ sw_image_file_path }}
   delegate_to: localhost
+
+
+
+- name: "Assert {{ software_image_file_name }} exists on the local - FAIL Playbook if NOT existing"
+  ansible.builtin.assert:
+    that:
+      - file_check.stat.exists
+    fail_msg: "{{ software_image_file_name }} does not exist on local. Playbook stopped"
+    success_msg: "{{ software_image_file_name }} exists on local. Proceeding with the next tasks."
+  delegate_to: localhost
+
+# Looks like junos_scp module is deprecated and replaced by ansible.netcommon.net_put
+# https://docs.ansible.com/ansible/latest/collections/junipernetworks/junos/junos_scp_module.html#ansible-collections-junipernetworks-junos-junos-scp-module
+
+# - name: Upload OS image to the Juniper device
+#   junipernetworks.junos.junos_scp:
+#     src: "{{ sw_image_file_path }}"
+#     dest: "{{ juniper_device_tmp_storage }}"
+#     host: "{{ inventory_hostname }}"
+#   register: upload_result
 
 # Socket issue here
 # - name: copy file from ansible controller to a network device
@@ -22,17 +53,18 @@
 #   register: upload_result
 #   # delegate_to: localhost
 
-# Failed to connect
 - name: Scp file from ansible controller to the juniper device
   ansible.builtin.shell: |
     sshpass -p '{{ ansible_password }}' scp -o StrictHostKeyChecking=no {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
   delegate_to: localhost
-  register: upload_result  
+  register: upload_result
+  ignore_errors: true
 
 - name: Debug upload result
   ansible.builtin.debug:
     var: upload_result
   delegate_to: localhost
+  ignore_errors: true
 
 - name: List files
   junipernetworks.junos.junos_command:
@@ -44,114 +76,12 @@
   ansible.builtin.debug:
     var: file_list["stdout_lines"][0]
   delegate_to: localhost
+  ignore_errors: true
 
-
-# - name: Clone the os images git artifacts
-#   ansible.builtin.git:
-#     repo: "{{ git_repo_url }}"
-#     dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
-#     version: "{{ git_repo_branch }}"
-#     force: yes       # Still clone down and overwrite incase local repo is existing.
-#   ignore_errors: true
-#   run_once: true
-#   delegate_to: localhost
-
-# - name: Set facts
-#   ansible.builtin.set_fact:
-#     sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
-#     ssh_key_path: "{{ tmp_root_dir }}/id_rsa"
-#   delegate_to: localhost
-
-# - name: "Check if {{ software_image_file_name }} exists on the local"
-#   ansible.builtin.stat:
-#     path: "{{ sw_image_file_path }}"
-#   register: file_check 
-#   delegate_to: localhost
-#   ignore_errors: true
-    
-# - name: "Assert {{ software_image_file_name }} exists on the local - FAIL Playbook if NOT existing"
-#   ansible.builtin.assert:
-#     that:
-#       - file_check.stat.exists
-#     fail_msg: "{{ software_image_file_name }} does not exist on local. Playbook stopped"
-#     success_msg: "{{ software_image_file_name }} exists on local. Proceeding with the next tasks."
-#   delegate_to: localhost
-
-
-# Step 2 : Upload image to the device
-
-# ISSUES HERE!
-# 1, junos-eznc missing.. fixed with image rebuild.
-# 2. timeout .. not a valid parameter!..Well? It is in the documentation!
-# 3. host .. Needed when not missing! ..But when added, it is not a valid parameter!..Yet it is in the documentation..ghhhhhrr
-# Looks like module is deprecated! https://docs.ansible.com/ansible/latest/collections/junipernetworks/junos/junos_scp_module.html#ansible-collections-junipernetworks-junos-junos-scp-module
-
-# - name: Upload OS image to the Juniper device
-#   junipernetworks.junos.junos_scp:
-#     src: "{{ sw_image_file_path }}"
-#     dest: "{{ juniper_device_tmp_storage }}"
-#     host: "{{ inventory_hostname }}"
-#     # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
-#   register: upload_result
-
-
-
-
-# You must provide either 'host' or 'sock_fd' value..what theeeee fuuuuckk???.. And yet these values are said to be invalid when called!ghhhhrrr
-# - name: Upload OS image to the Juniper device
-#   junipernetworks.junos.junos_package:
-#     src: "{{ sw_image_file_path }}"
-#     # dest: "{{ juniper_device_tmp_storage }}"
-#     # host: "{{ inventory_hostname }}"
-#     reboot: false
-#     # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
-#   register: upload_result
-
-# - name: Ensure ssh key file exists
-#   ansible.builtin.file:
-#     path: "{{ ssh_key_path }}"
-#     state: touch
-#   delegate_to: localhost
-
-
-
-# - name: Generate SSH Key
-#   community.crypto.openssh_keypair:
-#     path: "{{ ssh_key_path }}"
-#     state: present
-#     force: true
-#   register: ssh_key
-#   delegate_to: localhost
-
-# - name: Check keys 
-#   ansible.builtin.shell: |
-#     ls -al {{ tmp_root_dir }}
-#   register: files_list
-
-# - name: Debug output
-#   ansible.builtin.debug:
-#     var: files_list["stdout_lines"]
-
-# - name: Copy public key to the Juniper device
-#   ansible.builtin.shell: |
-#     sshpass -p "{{ ansible_password }}" ssh-copy-id -i {{ ssh_key_path }}.pub {{ ansible_user }}@{{ ansible_host }}
-#   # ignore_errors: true
-#   delegate_to: localhost
-
-# - name: Test SSH access to the Juniper device
-#   ansible.builtin.command: ssh {{ ansible_user }}@{{ ansible_host }} "echo SSH Access OK"
-#   register: ssh_test
-#   ignore_errors: true
-#   delegate_to: localhost
-
-# - name: Debug SSH Test Result
-#   ansible.builtin.debug:
-#     var: ssh_test
-#   delegate_to: localhost  
-
-# - name: Scp file from ansible controller to the juniper device
-#   ansible.builtin.shell: |
-#     scp {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
-#   register: upload_result
-#   delegate_to: localhost
-
+- name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
+  ansible.builtin.assert:
+    that:
+      - "{{ software_image_file_name }} in file_list['stdout_lines'][0]"
+    fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
+    success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
+  delegate_to: localhost
