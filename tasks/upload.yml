@@ -13,14 +13,38 @@
   delegate_to: localhost
 
 # Socket issue here
-- name: copy file from ansible controller to a network device
-  ansible.netcommon.net_put:
-    src: "{{ sw_image_file_path }}"
-    dest: "{{ juniper_device_tmp_storage }}"
-  # vars:
-  #   ansible_connection: ansible.netcommon.network_cli
-  register: upload_result
-  # delegate_to: localhost
+# - name: copy file from ansible controller to a network device
+#   ansible.netcommon.net_put:
+#     src: "{{ sw_image_file_path }}"
+#     dest: "{{ juniper_device_tmp_storage }}"
+#   # vars:
+#   #   ansible_connection: ansible.netcommon.network_cli
+#   register: upload_result
+#   # delegate_to: localhost
+
+# Failed to connect
+- name: Scp file from ansible controller to the juniper device
+  ansible.builtin.shell: |
+    sshpass -p '{{ ansible_password }}' scp {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
+  delegate_to: localhost
+  register: upload_result  
+
+- name: Debug upload result
+  ansible.builtin.debug:
+    var: upload_result
+  delegate_to: localhost
+
+- name: List files
+  junipernetworks.junos.junos_command:
+    commands: "file list {{ juniper_device_tmp_storage }}"
+  register: file_list
+  ignore_errors: true
+
+- name: Debug upload result
+  ansible.builtin.debug:
+    var: file_list
+  delegate_to: localhost
+
 
 # - name: Clone the os images git artifacts
 #   ansible.builtin.git:
@@ -71,11 +95,7 @@
 #   register: upload_result
 
 
-# Failed to connect
-# - name: Scp file from ansible controller to the juniper device
-#   ansible.builtin.shell: |
-#     sshpass -p "{{ ansible_password }}" scp {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
-#   register: upload_result
+
 
 # You must provide either 'host' or 'sock_fd' value..what theeeee fuuuuckk???.. And yet these values are said to be invalid when called!ghhhhrrr
 # - name: Upload OS image to the Juniper device
@@ -135,7 +155,3 @@
 #   register: upload_result
 #   delegate_to: localhost
 
-- name: Debug upload result
-  ansible.builtin.debug:
-    var: upload_result
-  delegate_to: localhost
