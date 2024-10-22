@@ -15,6 +15,10 @@
 #     # host: "{{ inventory_hostname }}"
 #   register: upgrade
 
+## pull down junos-exec-env from quay.io and confirm the story of modules missing!
+## This shit has to work within Wed!!
+## Keep buying time with dual-re devices for testing though!..ha ha ha
+
 - name: Upgrade Junos OS from package copied at device
   juniper.device.software:
     host: "{{ inventory_hostname }}"
