@@ -42,7 +42,7 @@
 
 - name: Debug upload result
   ansible.builtin.debug:
-    var: file_list["stdout_lines"]
+    var: file_list["stdout_lines"][0]
   delegate_to: localhost
 
 
