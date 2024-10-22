@@ -112,7 +112,7 @@
 - name: Copy public key to the Juniper device
   ansible.builtin.shell: |
     sshpass -p "{{ ansible_password }}" ssh-copy-id -i {{ ssh_key_path }}.pub {{ ansible_user }}@{{ ansible_host }}
-  ignore_errors: true
+  # ignore_errors: true
   delegate_to: localhost
 
 - name: Test SSH access to the Juniper device
