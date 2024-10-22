@@ -12,7 +12,7 @@
   junipernetworks.junos.junos_package:
     src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
     no_copy: true
-    host: "{{ inventory_hostname }}"
+    # host: "{{ inventory_hostname }}"
   register: upgrade
 
 - name: Debug upgrade results
