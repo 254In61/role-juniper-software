@@ -1,16 +1,25 @@
 ---
 # 1. Confirm image is already uploaded on the device
-- name: List files on the device
-  junipernetworks.junos.junos_command:
-    commands: "file list {{ juniper_device_tmp_storage }}"
-  register: file_list
-  ignore_errors: true
-
-# - name: Debug upload result
-#   ansible.builtin.debug:
-#     var: file_list["stdout_lines"][0]
-#   delegate_to: localhost
+# - name: List files on the device
+#   junipernetworks.junos.junos_command:
+#     commands: "file list {{ juniper_device_tmp_storage }}"
+#   register: file_list
 #   ignore_errors: true
+
+- name: "Execute command with login credentials"
+  juniper.device.command:
+    host: "{{ inventory_hostname }}"
+    user: "{{ ansible_user }}"
+    passwd: "{{ ansible_password }}"
+    commands:
+      - "file list {{ juniper_device_tmp_storage }}"
+  register: file_list
+
+- name: Debug upload result
+  ansible.builtin.debug:
+    var: file_list["stdout_lines"][0]
+  delegate_to: localhost
+  ignore_errors: true
 
 - name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
   ansible.builtin.assert:
