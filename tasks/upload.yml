@@ -15,7 +15,7 @@
 - name: Set facts
   ansible.builtin.set_fact:
     sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
-    ssh_key_path: "~/.ssh/id_rsa"
+    ssh_key_path: "{{ tmp_root_dir }}/id_rsa"
   delegate_to: localhost
 
 - name: "Check if {{ software_image_file_name }} exists on the local"
