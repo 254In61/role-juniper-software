@@ -1,10 +1,26 @@
 ---
-
 # 1. Confirm image is already uploaded on the device
+- name: List files on the device
+  junipernetworks.junos.junos_command:
+    commands: "file list {{ juniper_device_tmp_storage }}"
+  register: file_list
+  ignore_errors: true
 
+# - name: Debug upload result
+#   ansible.builtin.debug:
+#     var: file_list["stdout_lines"][0]
+#   delegate_to: localhost
+#   ignore_errors: true
+
+- name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
+  ansible.builtin.assert:
+    that:
+      - software_image_file_name in file_list.stdout[0]
+    fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
+    success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
+  delegate_to: localhost
 
 # 2. Determine device is single or dual routing engine
-
 - name: Gather Junos-specific facts
   junipernetworks.junos.junos_facts:
     gather_subset:
