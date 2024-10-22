@@ -8,12 +8,24 @@
   ignore_errors: true
   delegate_to: localhost
 
-- name: install local package on remote device
-  junipernetworks.junos.junos_package:
-    src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+# - name: install local package on remote device
+#   junipernetworks.junos.junos_package:
+#     src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+#     no_copy: true
+#     # host: "{{ inventory_hostname }}"
+#   register: upgrade
+
+- name: Upgrade Junos OS from package copied at device
+  juniper.device.software:
+    host: "{{ inventory_hostname }}"
+    user: "{{ ansible_user }}"
+    passwd: "{{ ansible_password }}"
+    remote_package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
     no_copy: true
-    # host: "{{ inventory_hostname }}"
-  register: upgrade
+    cleanfs: false
+    validate: true
+  register: response
+
 
 - name: Debug upgrade results
   ansible.builtin.debug:
