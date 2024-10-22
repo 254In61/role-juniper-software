@@ -20,7 +20,7 @@
   # vars:
   #   ansible_connection: ansible.netcommon.network_cli
   register: upload_result
-  delegate_to: localhost
+  # delegate_to: localhost
 
 # - name: Clone the os images git artifacts
 #   ansible.builtin.git:
