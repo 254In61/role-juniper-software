@@ -25,7 +25,7 @@
 # Failed to connect
 - name: Scp file from ansible controller to the juniper device
   ansible.builtin.shell: |
-    sshpass -p '{{ ansible_password }}' scp {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
+    sshpass -p '{{ ansible_password }}' scp -o StrictHostKeyChecking=no {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
   delegate_to: localhost
   register: upload_result  
 
