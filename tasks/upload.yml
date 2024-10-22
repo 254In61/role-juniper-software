@@ -75,31 +75,43 @@
 #     # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
 #   register: upload_result
 
+- name: Ensure ssh key file exists
+  ansible.builtin.file:
+    path: "{{ ssh_key_path }}"
+    state: touch
+  delegate_to: localhost
+
 - name: Generate SSH Key
   community.crypto.openssh_keypair:
     path: "{{ ssh_key_path }}"
     state: present
   register: ssh_key
+  delegate_to: localhost
 
 - name: Copy public key to the Juniper device
   ansible.builtin.shell: |
     sshpass -p "{{ ansible_password }}" ssh-copy-id -i {{ ssh_key_path }}.pub {{ ansible_user }}@{{ ansible_host }}
   ignore_errors: true
+  delegate_to: localhost
 
 - name: Test SSH access to the Juniper device
   ansible.builtin.command: ssh {{ ansible_host }} "echo SSH Access OK"
   register: ssh_test
   ignore_errors: true
+  delegate_to: localhost
 
 - name: Debug SSH Test Result
   ansible.builtin.debug:
     var: ssh_test
+  delegate_to: localhost  
 
 - name: Scp file from ansible controller to the juniper device
   ansible.builtin.shell: |
     scp {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
   register: upload_result
+  delegate_to: localhost
 
 - name: Debug upload result
   ansible.builtin.debug:
     var: upload_result
+  delegate_to: localhost
