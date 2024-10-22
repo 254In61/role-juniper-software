@@ -6,20 +6,20 @@
     sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
   # delegate_to: localhost # Using connection: local
 
-- name: Clone the os images git artifacts
-  ansible.builtin.git:
-    repo: "{{ git_repo_url }}"
-    dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
-    version: "{{ git_repo_branch }}"
-    force: yes       # Still clone down and overwrite incase local repo is existing.
-  ignore_errors: true
-  run_once: true
-  # delegate_to: localhost # Using connection: local
+# - name: Clone the os images git artifacts
+#   ansible.builtin.git:
+#     repo: "{{ git_repo_url }}"
+#     dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
+#     version: "{{ git_repo_branch }}"
+#     force: yes       # Still clone down and overwrite incase local repo is existing.
+#   ignore_errors: true
+#   run_once: true
+#   # delegate_to: localhost # Using connection: local
 
-# - name: Test Task - Generate random file
-#   ansible.builtin.shell: |
-#     ls -al >> {{ sw_image_file_path }}
-#   delegate_to: localhost
+- name: Test Task - Generate random file
+  ansible.builtin.shell: |
+    ls -al >> {{ sw_image_file_path }}
+  delegate_to: localhost
 
 - name: Confirm file exists within the ansible controller
   ansible.builtin.stat:
@@ -63,7 +63,7 @@
 
 - name: Copy a local file into /var/tmp on the remote device
   juniper.device.file_copy:
-    remote_dir: "{{ {{ juniper_device_tmp_storage }}  }}"
+    remote_dir: "{{ juniper_device_tmp_storage }}"
     local_dir: "{{ sw_image_file_path }}"
     action: put
     file: "{{ software_image_file_name }}"
