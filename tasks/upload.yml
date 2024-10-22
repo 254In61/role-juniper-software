@@ -81,6 +81,12 @@
 #     state: touch
 #   delegate_to: localhost
 
+- name: Set facts
+  ansible.builtin.set_fact:
+    sw_image_file_path: "{{ tmp_root_dir }}/{{ software_image_file_name }}"
+    ssh_key_path: "{{ tmp_root_dir }}/id_rsa"
+  delegate_to: localhost
+
 - name: Generate random file
   ansible.builtin.shell: |
     ls -al >> {{ sw_image_file_path }}
