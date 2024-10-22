@@ -37,7 +37,7 @@
 - name: List files
   junipernetworks.junos.junos_command:
     commands: "file list {{ juniper_device_tmp_storage }}"
-  register: file_list
+  register: file_list["stdout_lines"]
   ignore_errors: true
 
 - name: Debug upload result
