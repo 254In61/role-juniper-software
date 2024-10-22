@@ -2,36 +2,36 @@
 # Uploading software image to the device
 
 # Step 1 : Download OS image from the artifacts store (gitlab in this case) and upload to device
-- name: Clone the os images git artifacts
-  ansible.builtin.git:
-    repo: "{{ git_repo_url }}"
-    dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
-    version: "{{ git_repo_branch }}"
-    force: yes       # Still clone down and overwrite incase local repo is existing.
-  ignore_errors: true
-  run_once: true
-  delegate_to: localhost
+# - name: Clone the os images git artifacts
+#   ansible.builtin.git:
+#     repo: "{{ git_repo_url }}"
+#     dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
+#     version: "{{ git_repo_branch }}"
+#     force: yes       # Still clone down and overwrite incase local repo is existing.
+#   ignore_errors: true
+#   run_once: true
+#   delegate_to: localhost
 
-- name: Set facts
-  ansible.builtin.set_fact:
-    sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
-    ssh_key_path: "{{ tmp_root_dir }}/id_rsa"
-  delegate_to: localhost
+# - name: Set facts
+#   ansible.builtin.set_fact:
+#     sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
+#     ssh_key_path: "{{ tmp_root_dir }}/id_rsa"
+#   delegate_to: localhost
 
-- name: "Check if {{ software_image_file_name }} exists on the local"
-  ansible.builtin.stat:
-    path: "{{ sw_image_file_path }}"
-  register: file_check 
-  delegate_to: localhost
-  ignore_errors: true
+# - name: "Check if {{ software_image_file_name }} exists on the local"
+#   ansible.builtin.stat:
+#     path: "{{ sw_image_file_path }}"
+#   register: file_check 
+#   delegate_to: localhost
+#   ignore_errors: true
     
-- name: "Assert {{ software_image_file_name }} exists on the local - FAIL Playbook if NOT existing"
-  ansible.builtin.assert:
-    that:
-      - file_check.stat.exists
-    fail_msg: "{{ software_image_file_name }} does not exist on local. Playbook stopped"
-    success_msg: "{{ software_image_file_name }} exists on local. Proceeding with the next tasks."
-  delegate_to: localhost
+# - name: "Assert {{ software_image_file_name }} exists on the local - FAIL Playbook if NOT existing"
+#   ansible.builtin.assert:
+#     that:
+#       - file_check.stat.exists
+#     fail_msg: "{{ software_image_file_name }} does not exist on local. Playbook stopped"
+#     success_msg: "{{ software_image_file_name }} exists on local. Proceeding with the next tasks."
+#   delegate_to: localhost
 
 
 # Step 2 : Upload image to the device
@@ -75,10 +75,15 @@
 #     # timeout: 1800 # Is 1 hr an overkill? => Ansible complains about this, yet it is a parameter as per the documentation
 #   register: upload_result
 
-- name: Ensure ssh key file exists
-  ansible.builtin.file:
-    path: "{{ ssh_key_path }}"
-    state: touch
+# - name: Ensure ssh key file exists
+#   ansible.builtin.file:
+#     path: "{{ ssh_key_path }}"
+#     state: touch
+#   delegate_to: localhost
+
+- name: Generate random file
+  ansible.builtin.shell: |
+    ls -al >> {{ sw_image_file_path }}
   delegate_to: localhost
 
 - name: Generate SSH Key
@@ -89,6 +94,15 @@
   register: ssh_key
   delegate_to: localhost
 
+- name: Check keys 
+  ansible.builtin.shell: |
+    ls -al {{ tmp_root_dir }}
+  register: files_list
+
+- name: Debug output
+  ansible.builtin.debug:
+    var: files_list["stdout_lines"]
+
 - name: Copy public key to the Juniper device
   ansible.builtin.shell: |
     sshpass -p "{{ ansible_password }}" ssh-copy-id -i {{ ssh_key_path }}.pub {{ ansible_user }}@{{ ansible_host }}
@@ -96,7 +110,7 @@
   delegate_to: localhost
 
 - name: Test SSH access to the Juniper device
-  ansible.builtin.command: ssh {{ ansible_host }} "echo SSH Access OK"
+  ansible.builtin.command: ssh {{ ansible_user }}@{{ ansible_host }} "echo SSH Access OK"
   register: ssh_test
   ignore_errors: true
   delegate_to: localhost
