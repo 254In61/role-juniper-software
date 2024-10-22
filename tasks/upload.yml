@@ -2,24 +2,18 @@
 # Uploading software image to the device
 - name: Set facts
   ansible.builtin.set_fact:
-    sw_image_file_path: "{{ tmp_root_dir }}/{{ software_image_file_name }}"
-    # sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
-  # delegate_to: localhost # Using connection: local
+    sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
+  delegate_to: localhost 
 
-# - name: Clone the os images git artifacts
-#   ansible.builtin.git:
-#     repo: "{{ git_repo_url }}"
-#     dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
-#     version: "{{ git_repo_branch }}"
-#     force: yes       # Still clone down and overwrite incase local repo is existing.
-#   ignore_errors: true
-#   run_once: true
-#   # delegate_to: localhost # Using connection: local
-
-- name: Test Task - Generate random file
-  ansible.builtin.shell: |
-    ls -al >> {{ sw_image_file_path }}
-  delegate_to: localhost
+- name: Clone the os images git artifacts
+  ansible.builtin.git:
+    repo: "{{ git_repo_url }}"
+    dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
+    version: "{{ git_repo_branch }}"
+    force: yes 
+  ignore_errors: true
+  run_once: true
+  delegate_to: localhost 
 
 - name: Confirm file exists within the ansible controller
   ansible.builtin.stat:
@@ -32,48 +26,20 @@
       - file_check.stat.exists
     fail_msg: "{{ software_image_file_name }} does not exist on local. Playbook stopped"
     success_msg: "{{ software_image_file_name }} exists on local. Proceeding with the next tasks."
-  # delegate_to: localhost # Using connection: local
+  delegate_to: localhost 
 
-# Looks like junos_scp module is deprecated and replaced by ansible.netcommon.net_put
-# https://docs.ansible.com/ansible/latest/collections/junipernetworks/junos/junos_scp_module.html#ansible-collections-junipernetworks-junos-junos-scp-module
-
-# - name: Upload OS image to the Juniper device
-#   junipernetworks.junos.junos_scp:
-#     src: "{{ sw_image_file_path }}"
-#     dest: "{{ juniper_device_tmp_storage }}"
-#     host: "{{ inventory_hostname }}"
-#   register: upload_result
-
-# Socket issue here
-# - name: copy file from ansible controller to a network device
-#   ansible.netcommon.net_put:
-#     src: "{{ sw_image_file_path }}"
-#     dest: "{{ juniper_device_tmp_storage }}"
-#   # vars:
-#   #   ansible_connection: ansible.netcommon.network_cli
-#   register: upload_result
-#   # delegate_to: localhost
-
-# - name: Scp file from ansible controller to the juniper device
-#   ansible.builtin.shell: |
-#     sshpass -p '{{ ansible_password }}' scp -o StrictHostKeyChecking=no {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
-#   delegate_to: localhost
-#   register: upload_result
-#   ignore_errors: true
-
-- name: Copy a local file into /var/tmp on the remote device
-  juniper.device.file_copy:
-    remote_dir: "{{ juniper_device_tmp_storage }}"
-    local_dir: "{{ sw_image_file_path }}"
-    action: put
-    file: "{{ software_image_file_name }}"
-  register: upload_result
-  
-- name: Debug upload result
-  ansible.builtin.debug:
-    var: upload_result
+- name: Scp file from ansible controller to the juniper device
+  ansible.builtin.shell: |
+    sshpass -p '{{ ansible_password }}' scp -o StrictHostKeyChecking=no {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
   delegate_to: localhost
+  register: upload_result
   ignore_errors: true
+
+# - name: Debug upload result
+#   ansible.builtin.debug:
+#     var: upload_result
+#   delegate_to: localhost
+#   ignore_errors: true
 
 - name: List files
   junipernetworks.junos.junos_command:
@@ -93,6 +59,4 @@
       - software_image_file_name in file_list.stdout[0]
     fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
     success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
-  # delegate_to: localhost # Using connection: local
-
-# No need to clean git files since container is ephemeral
+  delegate_to: localhost
