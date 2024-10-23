@@ -1,19 +1,21 @@
 ---
 # 1. Confirm image is already uploaded on the device
-# - name: List files on the device
-#   junipernetworks.junos.junos_command:
-#     commands: "file list {{ juniper_device_tmp_storage }}"
-#   register: file_list
-#   ignore_errors: true
-
-- name: "Execute command with login credentials"
-  juniper.device.command:
-    host: "{{ inventory_hostname }}"
-    user: "{{ ansible_user }}"
-    passwd: "{{ ansible_password }}"
-    commands:
-      - "file list {{ juniper_device_tmp_storage }}"
+- name: List files on the device
+  junipernetworks.junos.junos_command:
+    commands: "file list {{ juniper_device_tmp_storage }}"
   register: file_list
+  ignore_errors: true
+
+# The error was: ModuleNotFoundError: No module named 'jnpr'
+# Added junos-eznc library to the junos-exec-env but still getting same error
+# - name: "Execute command with login credentials"
+#   juniper.device.command:
+#     host: "{{ inventory_hostname }}"
+#     user: "{{ ansible_user }}"
+#     passwd: "{{ ansible_password }}"
+#     commands:
+#       - "file list {{ juniper_device_tmp_storage }}"
+#   register: file_list
 
 - name: Debug upload result
   ansible.builtin.debug:
