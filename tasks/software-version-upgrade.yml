@@ -51,11 +51,53 @@
 # 3. Perform software upgrade
 
 # dual routing engines
-- name: Import dual routing engine tasks
-  ansible.builtin.import_tasks: dual-re.yml
+- block:
+     # dual routing engine upgrade tasks
+     ## Need to write this logic!!
+
+    - name: dual routing engine test task
+      ansible.builtin.debug:
+        msg:
+          - "Device has dual routing engines."
+      ignore_errors: true
+      delegate_to: localhost
+      
+
   when: junos_facts.ansible_facts["ansible_net_has_2RE"]
+  
+  
 
 # single routing engines
-- name: Import single routing engine tasks
-  ansible.builtin.import_tasks: single-re.yml
+- block:
+     # single routing engine upgrade tasks
+
+    - name: single routing engine test task
+      ansible.builtin.debug:
+        msg:
+          - "Device has single routing engine."
+      ignore_errors: true
+      delegate_to: localhost
+
+    # - name: install local package on remote device
+    #   junipernetworks.junos.junos_package:
+    #     src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+    #     no_copy: true
+    #     # host: "{{ inventory_hostname }}"
+    #   register: upgrade
+
+    - name: Upgrade Junos OS from package copied at device
+      juniper.device.software:
+        host: "{{ inventory_hostname }}"
+        user: "{{ ansible_user }}"
+        passwd: "{{ ansible_password }}"
+        remote_package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+        no_copy: true
+        cleanfs: false
+        validate: true
+      register: response
+
+    - name: Debug upgrade results
+      ansible.builtin.debug:
+        var: upgrade
+
   when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
