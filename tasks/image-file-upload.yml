@@ -11,7 +11,7 @@
     dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
     version: "{{ git_repo_branch }}"
     force: yes 
-  ignore_errors: true
+  # ignore_errors: true # You want your play to fail if git clone process fails
   run_once: true
   delegate_to: localhost 
 
