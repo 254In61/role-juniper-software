@@ -13,6 +13,8 @@
     force: yes 
   # ignore_errors: true # You want your play to fail if git clone process fails
   run_once: true
+  environment:
+    GIT_SSL_NO_VERIFY: "true"
   delegate_to: localhost 
 
 - name: Confirm file exists within the ansible controller
