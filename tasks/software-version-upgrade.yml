@@ -86,17 +86,16 @@
     #     no_copy: true
     #     # host: "{{ inventory_hostname }}"
     #   register: upgrade
+    
+    # both junos.device.software and junipernetworks.junos.package modules are failing due to a python modules name 'jnpr' missing.
+    # This module is supposed to be within 'junos-eznc' library which was included in the junos-exec-env image creation.
+    # choose to go with the junos_command to achieve the objectives.
 
-    - name: Upgrade Junos OS from package copied at device
-      juniper.device.software:
-        host: "{{ inventory_hostname }}"
-        user: "{{ ansible_user }}"
-        passwd: "{{ ansible_password }}"
-        remote_package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-        no_copy: true
-        cleanfs: false
-        validate: true
-      register: response
+    # - name: List files on the device
+    #   junipernetworks.junos.junos_command:
+    #     commands: "file list {{ juniper_device_tmp_storage }}"
+    #   register: file_list
+    #   ignore_errors: true
 
     - name: Debug upgrade results
       ansible.builtin.debug:
