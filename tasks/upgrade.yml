@@ -63,16 +63,17 @@
      # dual routing engine upgrade tasks
      ## Need to write this logic!!
     
-    # Kept getting errors on junipernetworks.junos.package.
-    # The error was: ModuleNotFoundError: No module named 'jnpr' & no opportunity for dual re upgrade
-    # Added junos-eznc library to the junos-exec-env but still getting same error
-
     - name: dual routing engine test task
       ansible.builtin.debug:
         msg:
           - "Device has dual routing engines."
       ignore_errors: true
       delegate_to: localhost
+    
+    # Challenges with the different modules.
+    # It's either missing python package or deprecated code or missing module.
+    # There's junipernetworks.junos, juniper.device collections which have different module names!
+    # It is time consuming to include all of them into 1 image and then t-shoot under the hood why there are errors on the source code.
 
     # - name: install local package on remote device without rebooting
     #   junipernetworks.junos.junos_package:
@@ -80,30 +81,30 @@
     #     reboot: false
     #     no_copy: true # Image already uploaded in the device
 
-    - name: Install Junos OS package
-      juniper.device.software:
-        reboot: true
-        # version: "{{ os_version }}"
-        package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-        logfile: "{{ juniper_device_tmp_storage }}/software.log"
-        no_copy: true # Image already uploaded in the device
-      register: sw_upgrade
+    # - name: Install Junos OS package
+    #   juniper.device.software:
+    #     reboot: true
+    #     # version: "{{ os_version }}"
+    #     package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+    #     logfile: "{{ juniper_device_tmp_storage }}/software.log"
+    #     no_copy: true # Image already uploaded in the device
+    #   register: sw_upgrade
     
     
 
     # REF: https://blog.marquis.co/posts/2016-03-22-upgrading-dual-routing-engine-juniper-mx-series/
 
-    # STEP 1 : Ensure RE0 and RE1 have the copy of the software image.
+    ### Ensure RE0 and RE1 have the copy of the software image.
     # In-band copying would definately be faster than out-of-band scp!
 
     # STEP 2 : disable graceful-switchover and nonstop-routing
-    # - name: disable graceful-switchover and nonstop-routing
-    #   junipernetworks.junos.junos_command:
-    #     commands:
-    #       - deactivate chassis redundancy graceful-switchover
-    #       - deactivate routing-options nonstop-routing
-    #   register: disable_switchover
-    #   # ignore_errors: true # You don't want to ignore any errors here.
+    - name: disable graceful-switchover and nonstop-routing
+      junipernetworks.junos.junos_command:
+        commands:
+          - deactivate chassis redundancy graceful-switchover
+          - deactivate routing-options nonstop-routing
+      register: disable_switchover
+      # ignore_errors: true # You don't want to ignore any errors here.
     
     # STEP 3 : Upgrade the BACKUP RE
     # log onto the Backup RE, either by console or from the Master RE run the command request routing-engine login re1. 
