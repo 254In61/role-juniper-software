@@ -1,4 +1,6 @@
 ---
+# software image file upload tasks
+
 # Uploading software image to the device
 - name: Setting build/develop phase
   ansible.builtin.set_fact:
