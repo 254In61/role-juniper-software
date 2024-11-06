@@ -31,7 +31,7 @@
     #   #- interfaces     # Interface details
     #   - default         # default values
     gather_subset: all
-    gather_network_resources: all
+    # gather_network_resources: all
   register: junos_facts
 
 - name: Display gathered Junos facts
