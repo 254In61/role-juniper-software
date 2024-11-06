@@ -74,12 +74,18 @@
     # It's either missing python package or deprecated code or missing module.
     # There's junipernetworks.junos, juniper.device collections which have different module names!
     # It is time consuming to include all of them into 1 image and then t-shoot under the hood why there are errors on the source code.
+    
+    - name: Set connection type
+      ansible.builtin.set_fact:
+        ansible_connection: local
+      delegate_to: localhost
 
-    # - name: install local package on remote device without rebooting
-    #   junipernetworks.junos.junos_package:
-    #     src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-    #     reboot: false
-    #     no_copy: true # Image already uploaded in the device
+
+    - name: install local package on remote device without rebooting
+      junipernetworks.junos.junos_package:
+        src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+        reboot: false
+        no_copy: true # Image already uploaded in the device
 
     # - name: Install Junos OS package
     #   juniper.device.software:
@@ -98,12 +104,12 @@
     # In-band copying would definately be faster than out-of-band scp!
 
     # STEP 2 : disable graceful-switchover and nonstop-routing
-    - name: disable graceful-switchover and nonstop-routing
-      junipernetworks.junos.junos_command:
-        commands:
-          - deactivate chassis redundancy graceful-switchover
-          - deactivate routing-options nonstop-routing
-      register: disable_switchover
+    # - name: disable graceful-switchover and nonstop-routing
+    #   junipernetworks.junos.junos_command:
+    #     commands:
+    #       - deactivate chassis redundancy graceful-switchover
+    #       - deactivate routing-options nonstop-routing
+    #   register: disable_switchover
       # ignore_errors: true # You don't want to ignore any errors here.
     
     # STEP 3 : Upgrade the BACKUP RE
