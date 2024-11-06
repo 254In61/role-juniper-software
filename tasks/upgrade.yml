@@ -91,9 +91,9 @@
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
         reboot: false
         no_copy: true # Image already uploaded in the device
-        host: "{{ ansible_host }}"
-        user: "{{ ansible_user  }}"
-        passwd: "{{ ansible_password }}"
+        # host: "{{ ansible_host }}"
+        # user: "{{ ansible_user  }}"
+        # passwd: "{{ ansible_password }}"
       register: sw_upgrade
     
     # - name: Install Junos OS package
