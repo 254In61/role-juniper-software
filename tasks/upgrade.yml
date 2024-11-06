@@ -38,11 +38,11 @@
   register: file_list
   ignore_errors: true
 
-- name: Debug file_list
-  ansible.builtin.debug:
-    var: file_list["stdout_lines"][0]
-  delegate_to: localhost
-  ignore_errors: true
+# - name: Debug file_list
+#   ansible.builtin.debug:
+#     var: file_list["stdout_lines"][0]
+#   delegate_to: localhost
+#   ignore_errors: true
 
 - name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
   ansible.builtin.assert:
@@ -81,20 +81,20 @@
       # delegate_to: localhost
 
 
-    - name: install local package on remote device without rebooting
-      junipernetworks.junos.junos_package:
-        src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-        reboot: false
-        no_copy: true # Image already uploaded in the device
-
-    # - name: Install Junos OS package
-    #   juniper.device.software:
-    #     reboot: true
-    #     # version: "{{ os_version }}"
-    #     package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-    #     logfile: "{{ juniper_device_tmp_storage }}/software.log"
+    # - name: install local package on remote device without rebooting
+    #   junipernetworks.junos.junos_package:
+    #     src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+    #     reboot: false
     #     no_copy: true # Image already uploaded in the device
-    #   register: sw_upgrade
+
+    - name: Install Junos OS package
+      juniper.device.software:
+        reboot: true
+        # version: "{{ os_version }}"
+        package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+        logfile: "{{ juniper_device_tmp_storage }}/software.log"
+        no_copy: true # Image already uploaded in the device
+      register: sw_upgrade
     
     
 
