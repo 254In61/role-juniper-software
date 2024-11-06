@@ -75,6 +75,11 @@
     # There's junipernetworks.junos, juniper.device collections which have different module names!
     # It is time consuming to include all of them into 1 image and then t-shoot under the hood why there are errors on the source code.
     
+    # was picking lots of errors.
+    # rebuild junos-exec-env with juniper.device collection
+    # spinned a container using junos-exec-env
+    # went digging into the collections to find the specific .py file to see what is under the hood and the exact documentation on usage,
+
     - name: Set connection type
       ansible.builtin.set_fact:
         ansible_connection: local
@@ -86,16 +91,27 @@
     #     src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
     #     reboot: false
     #     no_copy: true # Image already uploaded in the device
-
+    
     - name: Install Junos OS package
       juniper.device.software:
-        reboot: true
+        host: "{{ ansible_host }}"
+        user: "{{ ansible_user  }}"
+        passwd: "{{ ansible_password }}"
+        # all_re: true # defaults to true. Whether or not to install the software on all Routing Engin
+        install_timeout: 1800  # The number of seconds to wait for the software installation to complete on the target Junos device.
+        reboot: true # Indicates if the target Junos device should be rebooted after performing the software install.
         # version: "{{ os_version }}"
-        package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+        remote_package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
         logfile: "{{ juniper_device_tmp_storage }}/software.log"
         no_copy: true # Image already uploaded in the device
       register: sw_upgrade
       # delegate_to: localhost
+
+    - name: Debug sw_upgrade output
+      ansible.builtin.debug:
+        var: sw_upgrade
+      delegate_to: localhost
+      ignore_errors: true
     
 
     # REF: https://blog.marquis.co/posts/2016-03-22-upgrading-dual-routing-engine-juniper-mx-series/
