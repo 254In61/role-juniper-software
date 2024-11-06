@@ -1,12 +1,6 @@
 ---
 # software upgrade tasks
 
-- name: Set some facts
-  ansible.builtin.set_fact:
-    netconf_port: 830
-    reboot_wait_time: 300 # Is 5 min enough?
-  delegate_to: localhost
-
 # Collect Junos facts
 - name: Gather Junos-specific facts
   junipernetworks.junos.junos_facts:
@@ -93,7 +87,6 @@
     #     ansible_connection: local
     #   # delegate_to: localhost
 
-
     - name: Install Junos OS package - junipernetworks.junos.junos_package
       junipernetworks.junos.junos_package:
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
@@ -105,8 +98,7 @@
         # passwd: "{{ ansible_password }}"
       ignore_errors: true
       register: sw_upgrade
-      notify:
-        - wait_reboot
+
     # - name: Install Junos OS package - juniper.device.software
     #   juniper.device.software:
     #     host: "{{ ansible_host }}"
@@ -128,15 +120,6 @@
         var: sw_upgrade
       delegate_to: localhost
       ignore_errors: true
-    
-    handlers:
-      - name: Waiting for reboot
-        ansible.builtin.wait_for: 
-          host: "{{ inventory_hostname }}"
-          port: "{{ netconf_port }}"
-          timeout: "{{ reboot_wait_time }}"
-        when: not sw_upgrade.check_mode
-
     
   when: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
