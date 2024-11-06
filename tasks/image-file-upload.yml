@@ -1,10 +1,16 @@
 ---
 # Uploading software image to the device
+- name: Setting build/develop phase
+  ansible.builtin.set_fact:
+    test_phase: true
+  delegate_to: localhost
+
 - name: Set facts
   ansible.builtin.set_fact:
     sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
   delegate_to: localhost 
 
+# Uncomment when test phase is done and the file is found in the git repo
 - name: Clone the os images git artifacts
   ansible.builtin.git:
     repo: "{{ git_repo_url }}"
@@ -17,6 +23,16 @@
     GIT_SSL_NO_VERIFY: "true"
   delegate_to: localhost 
 
+# Building a small test file to test uploads as of now.
+- name: TEST - Build a test image file
+  ansible.builtin.shell:
+    ls -l >> {{ sw_image_file_path }}
+    ls -l >> {{ sw_image_file_path }}
+    ls -l >> {{ sw_image_file_path }}
+    ls -l >> {{ sw_image_file_path }}
+  when: test_phase
+  delegate_to: localhost
+ 
 - name: Confirm file exists within the ansible controller
   ansible.builtin.stat:
     path: "{{ sw_image_file_path }}"
