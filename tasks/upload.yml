@@ -48,6 +48,10 @@
     success_msg: "{{ software_image_file_name }} exists on local. Proceeding with the next tasks."
   delegate_to: localhost 
 
+# Kept getting errors on junipernetworks.junos.package.
+# The error was: ModuleNotFoundError: No module named 'jnpr'
+# Added junos-eznc library to the junos-exec-env but still getting same error
+
 - name: Scp file from ansible controller to the juniper device
   ansible.builtin.shell: |
     sshpass -p '{{ ansible_password }}' scp -o StrictHostKeyChecking=no {{ sw_image_file_path }} {{ ansible_user }}@{{ ansible_host }}:{{ juniper_device_tmp_storage }} 
