@@ -22,7 +22,7 @@
 #     var: junos_facts.ansible_facts["ansible_net_version"]
 
 - name: Set pre_upgrade_os_version
-  ansible.buitin.set_fact:
+  ansible.builtin.set_fact:
     pre_upgrade_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
   delegate_to: localhost
 
