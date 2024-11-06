@@ -1,7 +1,37 @@
 ---
 # software upgrade tasks
+- name: Gather Junos-specific facts
+  junipernetworks.junos.junos_facts:
+    gather_subset:
+      - hardware        # Hardware-related facts like chassis info
+      - config         # Configuration information
+      #- interfaces     # Interface details
+      - default         # default values
+  register: junos_facts
 
-# 1. Confirm image is already uploaded on the device
+# - name: Display gathered Junos facts
+#   ansible.builtin.debug:
+#     var: junos_facts.ansible_facts
+
+# - name: Display ansible_net_has_2RE value
+#   ansible.builtin.debug:
+#     var: junos_facts.ansible_facts["ansible_net_has_2RE"]
+
+# - name: Display ansible_net_version value
+#   ansible.builtin.debug:
+#     var: junos_facts.ansible_facts["ansible_net_version"]
+
+- name: Set pre_upgrade_os_version
+  ansible.buitin.set_fact:
+    pre_upgrade_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
+  delegate_to: localhost
+
+- name: Display pre upgrade version
+  ansible.builtin.debug:
+    msg: 
+      - "Pre-upgrade OS version = {{ pre_upgrade_os_version }}"
+
+# Confirm image is already uploaded on the device
 - name: List files on the device
   junipernetworks.junos.junos_command:
     commands: "file list {{ juniper_device_tmp_storage }}"
@@ -22,28 +52,8 @@
     success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
   delegate_to: localhost
 
-# 2. Determine device is single or dual routing engine
-- name: Gather Junos-specific facts
-  junipernetworks.junos.junos_facts:
-    gather_subset:
-      - hardware        # Hardware-related facts like chassis info
-      - config         # Configuration information
-      #- interfaces     # Interface details
-      - default         # default values
-    # gather_subset: all
-    # gather_network_resources: all
-  register: junos_facts
 
-- name: Display gathered Junos facts
-  ansible.builtin.debug:
-    var: junos_facts.ansible_facts
-
-- name: Display ansible_net_has_2RE value
-  ansible.builtin.debug:
-    var: junos_facts.ansible_facts["ansible_net_has_2RE"]
-
-
-# 3. Perform software upgrade
+# Perform software upgrade
 # Settled for junos_command module.
 # juniper.device.software or junipernetworks.junos.package keep producing an error to do with 'jnpr' python package.
 # They python package is found in junos-eznc library which was installed in the junos-exec-env but the errors persist.
@@ -64,16 +74,6 @@
       ignore_errors: true
       delegate_to: localhost
     
-    - name: Confirm the code version
-      junipernetworks.junos.junos_command:
-        commands:
-          - show version                                       # Gets details of Master RE
-          - show version invoke-on other-routing-engine        # Get details of backup RE
-      register: show_version
-    
-    - name: Display show_version
-      ansible.builtin.debug:
-        var: show_version
     
 
     # REF: https://blog.marquis.co/posts/2016-03-22-upgrading-dual-routing-engine-juniper-mx-series/
