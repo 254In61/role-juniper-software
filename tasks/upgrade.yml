@@ -95,7 +95,7 @@
         logfile: "{{ juniper_device_tmp_storage }}/software.log"
         no_copy: true # Image already uploaded in the device
       register: sw_upgrade
-      delegate_to: localhost
+      # delegate_to: localhost
     
 
     # REF: https://blog.marquis.co/posts/2016-03-22-upgrading-dual-routing-engine-juniper-mx-series/
