@@ -86,7 +86,7 @@
     #   # delegate_to: localhost
 
 
-    - name: install local package on remote device without rebooting
+    - name: Install Junos OS package - junipernetworks.junos.junos_package
       junipernetworks.junos.junos_package:
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
         reboot: false
@@ -94,22 +94,24 @@
         # host: "{{ ansible_host }}"
         # user: "{{ ansible_user  }}"
         # passwd: "{{ ansible_password }}"
+      ignore_errors: true
       register: sw_upgrade
     
-    # - name: Install Junos OS package
-    #   juniper.device.software:
-    #     host: "{{ ansible_host }}"
-    #     user: "{{ ansible_user  }}"
-    #     passwd: "{{ ansible_password }}"
-    #     # all_re: true # defaults to true. Whether or not to install the software on all Routing Engin
-    #     install_timeout: 1800  # The number of seconds to wait for the software installation to complete on the target Junos device.
-    #     reboot: true # Indicates if the target Junos device should be rebooted after performing the software install.
-    #     # version: "{{ os_version }}"
-    #     remote_package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-    #     logfile: "{{ juniper_device_tmp_storage }}/software.log"
-    #     no_copy: true # Image already uploaded in the device
-    #   register: sw_upgrade
+    - name: Install Junos OS package - juniper.device.software
+      juniper.device.software:
+        host: "{{ ansible_host }}"
+        user: "{{ ansible_user  }}"
+        passwd: "{{ ansible_password }}"
+        # all_re: true # defaults to true. Whether or not to install the software on all Routing Engin
+        install_timeout: 1800  # The number of seconds to wait for the software installation to complete on the target Junos device.
+        reboot: true # Indicates if the target Junos device should be rebooted after performing the software install.
+        # version: "{{ os_version }}"
+        remote_package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+        logfile: "{{ juniper_device_tmp_storage }}/software.log"
+        no_copy: true # Image already uploaded in the device
+      register: sw_upgrade
       # delegate_to: localhost
+      ignore_errors: true
 
     - name: Debug sw_upgrade output
       ansible.builtin.debug:
