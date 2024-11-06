@@ -78,7 +78,7 @@
     - name: Set connection type
       ansible.builtin.set_fact:
         ansible_connection: local
-      delegate_to: localhost
+      # delegate_to: localhost
 
 
     - name: install local package on remote device without rebooting
