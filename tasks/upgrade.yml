@@ -1,5 +1,13 @@
 ---
 # software upgrade tasks
+
+- name: Set some facts
+  ansible.builtin.set_fact:
+    netconf_port: 830
+    reboot_wait_time: 300 # Is 5 min enough?
+  delegate_to: localhost
+
+# Collect Junos facts
 - name: Gather Junos-specific facts
   junipernetworks.junos.junos_facts:
     gather_subset:
@@ -21,15 +29,15 @@
 #   ansible.builtin.debug:
 #     var: junos_facts.ansible_facts["ansible_net_version"]
 
-- name: Set pre_upgrade_os_version
+- name: Set current_os_version
   ansible.builtin.set_fact:
-    pre_upgrade_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
+    current_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
   delegate_to: localhost
 
-- name: Display pre upgrade version
+- name: Display current version
   ansible.builtin.debug:
     msg: 
-      - "Pre-upgrade OS version = {{ pre_upgrade_os_version }}"
+      - "Current OS version = {{ current_os_version }}"
 
 # Confirm image is already uploaded on the device
 - name: List files on the device
@@ -89,7 +97,7 @@
     - name: Install Junos OS package - junipernetworks.junos.junos_package
       junipernetworks.junos.junos_package:
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-        reboot: false
+        reboot: true
         no_copy: true # Image already uploaded in the device
         provider: "{{ provider }}"
         # host: "{{ ansible_host }}"
@@ -97,22 +105,23 @@
         # passwd: "{{ ansible_password }}"
       ignore_errors: true
       register: sw_upgrade
-    
-    - name: Install Junos OS package - juniper.device.software
-      juniper.device.software:
-        host: "{{ ansible_host }}"
-        user: "{{ ansible_user  }}"
-        passwd: "{{ ansible_password }}"
-        # all_re: true # defaults to true. Whether or not to install the software on all Routing Engin
-        install_timeout: 1800  # The number of seconds to wait for the software installation to complete on the target Junos device.
-        reboot: true # Indicates if the target Junos device should be rebooted after performing the software install.
-        # version: "{{ os_version }}"
-        remote_package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-        logfile: "{{ juniper_device_tmp_storage }}/software.log"
-        no_copy: true # Image already uploaded in the device
-      register: sw_upgrade
-      # delegate_to: localhost
-      ignore_errors: true
+      notify:
+        - wait_reboot
+    # - name: Install Junos OS package - juniper.device.software
+    #   juniper.device.software:
+    #     host: "{{ ansible_host }}"
+    #     user: "{{ ansible_user  }}"
+    #     passwd: "{{ ansible_password }}"
+    #     # all_re: true # defaults to true. Whether or not to install the software on all Routing Engin
+    #     install_timeout: 1800  # The number of seconds to wait for the software installation to complete on the target Junos device.
+    #     reboot: true # Indicates if the target Junos device should be rebooted after performing the software install.
+    #     # version: "{{ os_version }}"
+    #     remote_package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+    #     logfile: "{{ juniper_device_tmp_storage }}/software.log"
+    #     no_copy: true # Image already uploaded in the device
+    #   register: sw_upgrade
+    #   # delegate_to: localhost
+    #   ignore_errors: true
 
     - name: Debug sw_upgrade output
       ansible.builtin.debug:
@@ -120,6 +129,37 @@
       delegate_to: localhost
       ignore_errors: true
     
+    handlers:
+      - name: Waiting for reboot
+        ansible.builtin.wait_for: 
+          host: "{{ inventory_hostname }}"
+          port: "{{ netconf_port }}"
+          timeout: "{{ reboot_wait_time }}"
+        when: not sw_upgrade.check_mode
+
+    
+  when: junos_facts.ansible_facts["ansible_net_has_2RE"]
+
+
+  # single routing engines
+- block:
+     # single routing engine upgrade tasks
+
+    - name: single routing engine test task
+      ansible.builtin.debug:
+        msg:
+          - "Device has single routing engine."
+      ignore_errors: true
+      delegate_to: localhost
+    
+    # Software upgrade tasks to come here
+
+    - name: Debug upgrade results
+      ansible.builtin.debug:
+        var: upgrade
+
+  when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
+
 
     # REF: https://blog.marquis.co/posts/2016-03-22-upgrading-dual-routing-engine-juniper-mx-series/
 
@@ -198,25 +238,7 @@
     #   register: show_version
       
 
-  when: junos_facts.ansible_facts["ansible_net_has_2RE"]
   
   
+  
 
-# single routing engines
-- block:
-     # single routing engine upgrade tasks
-
-    - name: single routing engine test task
-      ansible.builtin.debug:
-        msg:
-          - "Device has single routing engine."
-      ignore_errors: true
-      delegate_to: localhost
-    
-    # Software upgrade tasks to come here
-
-    - name: Debug upgrade results
-      ansible.builtin.debug:
-        var: upgrade
-
-  when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
