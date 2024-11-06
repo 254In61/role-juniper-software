@@ -25,7 +25,7 @@
 
 # Building a small test file to test uploads as of now.
 - name: TEST - Build a test image file
-  ansible.builtin.shell:
+  ansible.builtin.shell: |
     ls -l >> {{ sw_image_file_path }}
     ls -l >> {{ sw_image_file_path }}
     ls -l >> {{ sw_image_file_path }}
