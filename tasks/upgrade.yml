@@ -91,6 +91,7 @@
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
         reboot: false
         no_copy: true # Image already uploaded in the device
+        provider: "{{ provider }}"
         # host: "{{ ansible_host }}"
         # user: "{{ ansible_user  }}"
         # passwd: "{{ ansible_password }}"
