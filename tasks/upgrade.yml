@@ -64,7 +64,7 @@
      ## Need to write this logic!!
     
     # Kept getting errors on junipernetworks.junos.package.
-    # The error was: ModuleNotFoundError: No module named 'jnpr'
+    # The error was: ModuleNotFoundError: No module named 'jnpr' & no opportunity for dual re upgrade
     # Added junos-eznc library to the junos-exec-env but still getting same error
 
     - name: dual routing engine test task
@@ -73,6 +73,12 @@
           - "Device has dual routing engines."
       ignore_errors: true
       delegate_to: localhost
+
+    - name: install local package on remote device without rebooting
+      junipernetworks.junos.junos_package:
+        src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+        reboot: false
+        no_copy: true # Image already uploaded in the device
     
     
 
