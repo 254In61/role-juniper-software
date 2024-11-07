@@ -54,12 +54,6 @@
     success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
   delegate_to: localhost
 
-
-# Perform software upgrade
-# Settled for junos_command module.
-# juniper.device.software or junipernetworks.junos.package keep producing an error to do with 'jnpr' python package.
-# They python package is found in junos-eznc library which was installed in the junos-exec-env but the errors persist.
-
 # dual routing engines
 - block:
      # dual routing engine upgrade tasks
@@ -72,21 +66,6 @@
       ignore_errors: true
       delegate_to: localhost
     
-    # Challenges with the different modules.
-    # It's either missing python package or deprecated code or missing module.
-    # There's junipernetworks.junos, juniper.device collections which have different module names!
-    # It is time consuming to include all of them into 1 image and then t-shoot under the hood why there are errors on the source code.
-    
-    # was picking lots of errors.
-    # rebuild junos-exec-env with juniper.device collection
-    # spinned a container using junos-exec-env
-    # went digging into the collections to find the specific .py file to see what is under the hood and the exact documentation on usage,
-
-    # - name: Set connection type
-    #   ansible.builtin.set_fact:
-    #     ansible_connection: local
-    #   # delegate_to: localhost
-
     - name: Install Junos OS package - junipernetworks.junos.junos_package
       junipernetworks.junos.junos_package:
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
@@ -98,35 +77,16 @@
       ignore_errors: true
       register: sw_upgrade
 
-    # - name: Install Junos OS package - juniper.device.software
-    #   juniper.device.software:
-    #     host: "{{ ansible_host }}"
-    #     user: "{{ ansible_user  }}"
-    #     passwd: "{{ ansible_password }}"
-    #     # all_re: true # defaults to true. Whether or not to install the software on all Routing Engin
-    #     install_timeout: 1800  # The number of seconds to wait for the software installation to complete on the target Junos device.
-    #     reboot: true # Indicates if the target Junos device should be rebooted after performing the software install.
-    #     # version: "{{ os_version }}"
-    #     remote_package: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-    #     logfile: "{{ juniper_device_tmp_storage }}/software.log"
-    #     no_copy: true # Image already uploaded in the device
-    #   register: sw_upgrade
-    #   # delegate_to: localhost
-    #   ignore_errors: true
-
     - name: Debug sw_upgrade output
       ansible.builtin.debug:
         var: sw_upgrade
       delegate_to: localhost
       ignore_errors: true
 
-    - name: Wait for port 830 to become open on the host, don't start checking for 10 seconds
+    - name: Sleep for 300 seconds and continue with play
       ansible.builtin.wait_for:
-        host: "{{ inventory_hostname }}"
-        port: 830
-        delay: 10
-      timeout: 600  # Wait for up to 10 minutes
-      # delegate_to: localhost
+        timeout: 300  # Wait for up to 10 minutes
+      delegate_to: localhost
 
     - name: Check uptime and RE versions
       junipernetworks.junos.junos_command:
@@ -164,84 +124,4 @@
 
   when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
 
-    # REF: https://blog.marquis.co/posts/2016-03-22-upgrading-dual-routing-engine-juniper-mx-series/
-
-    ### Ensure RE0 and RE1 have the copy of the software image.
-    # In-band copying would definately be faster than out-of-band scp!
-
-    # STEP 2 : disable graceful-switchover and nonstop-routing
-    # - name: disable graceful-switchover and nonstop-routing
-    #   junipernetworks.junos.junos_command:
-    #     commands:
-    #       - deactivate chassis redundancy graceful-switchover
-    #       - deactivate routing-options nonstop-routing
-    #   register: disable_switchover
-      # ignore_errors: true # You don't want to ignore any errors here.
-    
-    # STEP 3 : Upgrade the BACKUP RE
-    # log onto the Backup RE, either by console or from the Master RE run the command request routing-engine login re1. 
-    # Once on the Backup RE, you will need to run the command 'request system software validate add /var/tmp/xxx reboot.'
-    # > request system software validate add /var/tmp/jinstall-14.1R6.4-domestic-signed.tgz reboot
-
-
-
-    # # STEP 4 : Failover the Master RE from the current Master RE.
-    # # > request chassis routing-engine master switch
-    # # This WILL cause a brief outage as the PFE is reset and the new firmware is loaded.
-    # - name: Failover the Master RE from the current Master RE
-    #   junipernetworks.junos.junos_command:
-    #     commands:
-    #       - request chassis routing-engine master switch  # Need to take care of the Y/N prompt
-    #   register: failover_master
-    #   # ignore_errors: true # You don't want to ignore any errors here.
-
-    # # STEP 5 : Confirm the upgrade
-    # # > show chassis routing-engine 
-  
-
-    # # STEP 6: Having failed over the RE now, all that needed is to repeat the same command as before 
-    # # Repeat STEP 3.. This time the backup RE will be RE0.
-
-
-    # # STEP 7 : re-enable graceful-switchover and non-routing,
-    # - name: Re-enable graceful-switchover and non-routing
-    #   junipernetworks.junos.junos_command:
-    #     commands:
-    #       - activate chassis redundancy graceful-switchover
-    #       - activate routing-options nonstop-routing
-    #   register: disable_switchover
-    #   # ignore_errors: true # You don't want to ignore any errors here.
-
-    
-    # # STEP 8 : set RE0 back to the Master Routing Engine
-    # # This time, will be done from RE1.
-    # - name: Set RE0 back to the Master Routing Engine
-    #   junipernetworks.junos.junos_command:
-    #     commands:
-    #       - request chassis routing-engine master switch # Deal with Toggle mastership between routing engines ? \[yes,no\] (no) yes 
-    #   register: failover_master
-    #   # ignore_errors: true # You don't want to ignore any errors here.
-    
-  
-    # # STEP 9 : Take a snapshot of the currently running and active file
-    # # BOTH primary and backup REs
-    # - name: Set RE0 back to the Master Routing Engine
-    #   junipernetworks.junos.junos_command:
-    #     commands:
-    #       - request system snapshot 
-    #   register: file_snapshot
-    #   # ignore_errors: true # You don't want to ignore any errors here.
-
-    # # STEP 10 : Confirm the code version by running
-    # - name: Confirm the code version
-    #   junipernetworks.junos.junos_command:
-    #     commands:
-    #       - show version                                       # Gets details of Master RE
-    #       - show version invoke-on other-routing-engine        # Get details of backup RE
-    #   register: show_version
-      
-
-  
-  
-  
-
+   
