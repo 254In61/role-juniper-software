@@ -1,5 +1,5 @@
-# role-cisco-config-backup
-Ansible role to backup cisco devices configs.
+# role-junos-software-upgrade
+Ansible role to implement software upgrade on junos devices
 
 # How to use
 Step 1: Install the role in your environment.
