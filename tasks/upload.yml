@@ -6,11 +6,13 @@
   ansible.builtin.set_fact:
     test_phase: true
   delegate_to: localhost
+  ignore_errors: true # You want the role to run end to end
 
 - name: Set facts
   ansible.builtin.set_fact:
     sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
   delegate_to: localhost 
+  ignore_errors: true # You want the role to run end to end
 
 # Uncomment when test phase is done and the file is found in the git repo
 - name: Clone the os images git artifacts
@@ -19,11 +21,11 @@
     dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
     version: "{{ git_repo_branch }}"
     force: yes 
-  # ignore_errors: true # You want your play to fail if git clone process fails
   run_once: true
   environment:
     GIT_SSL_NO_VERIFY: "true"
   delegate_to: localhost 
+  ignore_errors: true # You want the role to run end to end
 
 # Building a small test file to test uploads as of now.
 - name: TEST - Build a test image file
@@ -34,11 +36,13 @@
     ls -l >> {{ sw_image_file_path }}
   when: test_phase
   delegate_to: localhost
+  ignore_errors: true # You want the role to run end to end
  
 - name: Confirm file exists within the ansible controller
   ansible.builtin.stat:
     path: "{{ sw_image_file_path }}"
   register: file_check
+  ignore_errors: true # You want the role to run end to end
 
 - name: "Assert {{ software_image_file_name }} exists on the local - FAIL Playbook if NOT existing"
   ansible.builtin.assert:
@@ -46,7 +50,8 @@
       - file_check.stat.exists
     fail_msg: "{{ software_image_file_name }} does not exist on local. Playbook stopped"
     success_msg: "{{ software_image_file_name }} exists on local. Proceeding with the next tasks."
-  delegate_to: localhost 
+  delegate_to: localhost
+  ignore_errors: true # You want the role to run end to end
 
 # Kept getting errors on junipernetworks.junos.package.
 # The error was: ModuleNotFoundError: No module named 'jnpr'
@@ -84,6 +89,7 @@
     fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
     success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
   delegate_to: localhost
+  ignore_errors: true # You want the role to run end to end
 
 # Might not need this since containers are ephemeral.
 # But if testing or end up running the playbook more than once in the same container, this comes in handy

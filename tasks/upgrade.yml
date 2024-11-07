@@ -10,6 +10,7 @@
       #- interfaces     # Interface details
       - default         # default values
   register: junos_facts
+  ignore_errors: true # You want the role to run end to end
 
 # - name: Display gathered Junos facts
 #   ansible.builtin.debug:
@@ -22,6 +23,7 @@
 - name: Set PRE-UPGRADE OS Version
   ansible.builtin.set_fact:
     pre_upgrade_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
+  ignore_errors: true # You want the role to run end to end
 
 # Confirm image is already uploaded on the device
 - name: List files on the device
@@ -43,6 +45,7 @@
     fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
     success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
   delegate_to: localhost
+  ignore_errors: true # You want the role to run end to end
 
 # dual routing engines
 - block:
@@ -81,6 +84,7 @@
       delegate_to: localhost
 
   when: junos_facts.ansible_facts["ansible_net_has_2RE"]
+  ignore_errors: true # You want the role to run end to end
 
 
 # single routing engines
@@ -97,6 +101,7 @@
     # Software upgrade tasks to come here
 
   when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
+  ignore_errors: true # You want the role to run end to end
 
 # Collect Junos facts
 - name: Gather Junos-specific facts - POST-UPGRADE
@@ -107,13 +112,16 @@
       #- interfaces     # Interface details
       - default         # default values
   register: junos_facts
+  ignore_errors: true # You want the role to run end to end
 
 - name: Set POST-UPGRADE OS Version
   ansible.builtin.set_fact:
     post_upgrade_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
+  ignore_errors: true # You want the role to run end to end
 
 - name: Display OS version comparison
   ansible.builtin.debug:
     msg:
       - "PRE-UPGRADE OS VERSION = {{ pre_upgrade_os_version }}"
       - "POST-UPGRADE OS VERSION = {{ post_upgrade_os_version }}"
+  ignore_errors: true # You want the role to run end to end
