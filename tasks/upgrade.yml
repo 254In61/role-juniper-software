@@ -1,37 +1,9 @@
 ---
 # software upgrade tasks
 
-# Collect Junos facts
-- name: Gather Junos-specific facts
-  junipernetworks.junos.junos_facts:
-    gather_subset:
-      - hardware        # Hardware-related facts like chassis info
-      - config         # Configuration information
-      #- interfaces     # Interface details
-      - default         # default values
-  register: junos_facts
-
-# - name: Display gathered Junos facts
-#   ansible.builtin.debug:
-#     var: junos_facts.ansible_facts
-
-# - name: Display ansible_net_has_2RE value
-#   ansible.builtin.debug:
-#     var: junos_facts.ansible_facts["ansible_net_has_2RE"]
-
-# - name: Display ansible_net_version value
-#   ansible.builtin.debug:
-#     var: junos_facts.ansible_facts["ansible_net_version"]
-
-- name: Set current_os_version
-  ansible.builtin.set_fact:
-    current_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
+- name: Import junos-facts tasks
+  ansible.builtin.import_tasks: junos-facts.yml
   delegate_to: localhost
-
-- name: Display current version
-  ansible.builtin.debug:
-    msg: 
-      - "Current OS version = {{ current_os_version }}"
 
 # Confirm image is already uploaded on the device
 - name: List files on the device
@@ -89,13 +61,10 @@
 
     - name: Install Junos OS package - junipernetworks.junos.junos_package
       junipernetworks.junos.junos_package:
-        src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+        src: "{{ software_image_file_name }}"
         reboot: true
         no_copy: true # Image already uploaded in the device
         provider: "{{ provider }}"
-        # host: "{{ ansible_host }}"
-        # user: "{{ ansible_user  }}"
-        # passwd: "{{ ansible_password }}"
       ignore_errors: true
       register: sw_upgrade
 
@@ -120,6 +89,14 @@
         var: sw_upgrade
       delegate_to: localhost
       ignore_errors: true
+
+    - name: Check uptime and RE versions
+      junipernetworks.junos.junos_command:
+        commands:
+          - "show system uptime"
+          - "show version invoke-on all-routing-engines | grep junos:"
+      register: status_checks
+      ignore_errors: true
     
   when: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
@@ -142,6 +119,10 @@
         var: upgrade
 
   when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
+
+- name: Import junos-facts tasks
+  ansible.builtin.import_tasks: junos-facts.yml
+  delegate_to: localhost
 
 
     # REF: https://blog.marquis.co/posts/2016-03-22-upgrading-dual-routing-engine-juniper-mx-series/
