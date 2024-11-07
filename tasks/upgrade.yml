@@ -2,7 +2,7 @@
 # software upgrade tasks
 
 # Collect Junos facts
-- name: Gather Junos-specific facts
+- name: Gather Junos-specific facts - PRE-UPGRADE
   junipernetworks.junos.junos_facts:
     gather_subset:
       - hardware        # Hardware-related facts like chassis info
@@ -11,9 +11,9 @@
       - default         # default values
   register: junos_facts
 
-- name: Display gathered Junos facts
-  ansible.builtin.debug:
-    var: junos_facts.ansible_facts
+# - name: Display gathered Junos facts
+#   ansible.builtin.debug:
+#     var: junos_facts.ansible_facts
 
 # - name: Display ansible_net_has_2RE value
 #   ansible.builtin.debug:
@@ -23,15 +23,10 @@
 #   ansible.builtin.debug:
 #     var: junos_facts.ansible_facts["ansible_net_version"]
 
-- name: Set current_os_version
-  ansible.builtin.set_fact:
-    current_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
-  delegate_to: localhost
-
-- name: Display current version
+- name: Display OS version
   ansible.builtin.debug:
     msg: 
-      - "Current OS version = {{ current_os_version }}"
+      - "PRE-UPGRADE OS VERSION = {{ junos_facts.ansible_facts['ansible_net_version'] }}"
 
 # Confirm image is already uploaded on the device
 - name: List files on the device
@@ -66,6 +61,8 @@
       ignore_errors: true
       delegate_to: localhost
     
+    # This upgrades BOTH routing engines.
+    # module works wonders! ;) 
     - name: Install Junos OS package - junipernetworks.junos.junos_package
       junipernetworks.junos.junos_package:
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
@@ -88,20 +85,6 @@
         timeout: 300  # Wait for up to 10 minutes
       delegate_to: localhost
 
-    - name: Check uptime and RE versions
-      junipernetworks.junos.junos_command:
-        commands:
-          - "show system uptime"
-          - "show version invoke-on all-routing-engines | grep junos:"
-      register: status_checks
-      ignore_errors: true
-
-    - name: Debug status_checks output
-      ansible.builtin.debug:
-        var: status_checks
-      delegate_to: localhost
-      ignore_errors: true
-    
   when: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
 
@@ -118,10 +101,19 @@
     
     # Software upgrade tasks to come here
 
-    - name: Debug upgrade results
-      ansible.builtin.debug:
-        var: upgrade
-
   when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
 
-   
+# Collect Junos facts
+- name: Gather Junos-specific facts - POST-UPGRADE
+  junipernetworks.junos.junos_facts:
+    gather_subset:
+      - hardware        # Hardware-related facts like chassis info
+      - config         # Configuration information
+      #- interfaces     # Interface details
+      - default         # default values
+  register: junos_facts
+
+- name: Display OS version
+  ansible.builtin.debug:
+    msg: 
+      - "POST-UPGRADE OS VERSION = {{ junos_facts.ansible_facts['ansible_net_version'] }}"
