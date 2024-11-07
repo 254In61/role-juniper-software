@@ -1,9 +1,37 @@
 ---
 # software upgrade tasks
 
-- name: Import junos-facts tasks
-  ansible.builtin.import_tasks: junos-facts.yml
+# Collect Junos facts
+- name: Gather Junos-specific facts
+  junipernetworks.junos.junos_facts:
+    gather_subset:
+      - hardware        # Hardware-related facts like chassis info
+      - config         # Configuration information
+      #- interfaces     # Interface details
+      - default         # default values
+  register: junos_facts
+
+- name: Display gathered Junos facts
+  ansible.builtin.debug:
+    var: junos_facts.ansible_facts
+
+# - name: Display ansible_net_has_2RE value
+#   ansible.builtin.debug:
+#     var: junos_facts.ansible_facts["ansible_net_has_2RE"]
+
+# - name: Display ansible_net_version value
+#   ansible.builtin.debug:
+#     var: junos_facts.ansible_facts["ansible_net_version"]
+
+- name: Set current_os_version
+  ansible.builtin.set_fact:
+    current_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
   delegate_to: localhost
+
+- name: Display current version
+  ansible.builtin.debug:
+    msg: 
+      - "Current OS version = {{ current_os_version }}"
 
 # Confirm image is already uploaded on the device
 - name: List files on the device
@@ -97,6 +125,12 @@
           - "show version invoke-on all-routing-engines | grep junos:"
       register: status_checks
       ignore_errors: true
+
+    - name: Debug status_checks output
+      ansible.builtin.debug:
+        var: status_checks
+      delegate_to: localhost
+      ignore_errors: true
     
   when: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
@@ -119,11 +153,6 @@
         var: upgrade
 
   when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
-
-- name: Import junos-facts tasks
-  ansible.builtin.import_tasks: junos-facts.yml
-  delegate_to: localhost
-
 
     # REF: https://blog.marquis.co/posts/2016-03-22-upgrading-dual-routing-engine-juniper-mx-series/
 
