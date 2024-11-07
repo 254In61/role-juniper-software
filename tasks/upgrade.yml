@@ -92,6 +92,8 @@
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
         reboot: true
         no_copy: true # Image already uploaded in the device
+        validate: false
+        force: true
         provider: "{{ provider }}"
       ignore_errors: true
       register: sw_upgrade
