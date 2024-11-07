@@ -19,14 +19,9 @@
 #   ansible.builtin.debug:
 #     var: junos_facts.ansible_facts["ansible_net_has_2RE"]
 
-# - name: Display ansible_net_version value
-#   ansible.builtin.debug:
-#     var: junos_facts.ansible_facts["ansible_net_version"]
-
-- name: Display OS version
-  ansible.builtin.debug:
-    msg: 
-      - "PRE-UPGRADE OS VERSION = {{ junos_facts.ansible_facts['ansible_net_version'] }}"
+- name: Set PRE-UPGRADE OS Version
+  ansible.builtin.set_fact:
+    pre_upgrade_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
 
 # Confirm image is already uploaded on the device
 - name: List files on the device
@@ -113,7 +108,12 @@
       - default         # default values
   register: junos_facts
 
-- name: Display OS version
+- name: Set POST-UPGRADE OS Version
+  ansible.builtin.set_fact:
+    post_upgrade_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
+
+- name: Display OS version comparison
   ansible.builtin.debug:
-    msg: 
-      - "POST-UPGRADE OS VERSION = {{ junos_facts.ansible_facts['ansible_net_version'] }}"
+    msg:
+      - "PRE-UPGRADE OS VERSION = {{ pre_upgrade_os_version }}"
+      - "POST-UPGRADE OS VERSION = {{ post_upgrade_os_version }}"
