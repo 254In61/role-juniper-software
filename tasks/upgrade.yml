@@ -32,20 +32,20 @@
   register: file_list
   ignore_errors: true
 
-# - name: Debug file_list
-#   ansible.builtin.debug:
-#     var: file_list["stdout_lines"][0]
-#   delegate_to: localhost
-#   ignore_errors: true
-
-- name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
-  ansible.builtin.assert:
-    that:
-      - software_image_file_name in file_list.stdout[0]
-    fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
-    success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
+- name: Debug file_list
+  ansible.builtin.debug:
+    var: file_list["stdout_lines"][0]
   delegate_to: localhost
-  ignore_errors: true # You want the role to run end to end
+  ignore_errors: true
+
+# - name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
+#   ansible.builtin.assert:
+#     that:
+#       - software_image_file_name in file_list.stdout[0]
+#     fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
+#     success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
+#   delegate_to: localhost
+#   ignore_errors: true # You want the role to run end to end
 
 # dual routing engines
 - block:
@@ -59,13 +59,11 @@
       ignore_errors: true
       delegate_to: localhost
     
-    # This upgrades BOTH routing engines.
-    # module works wonders! ;) 
     - name: Install Junos OS package - junipernetworks.junos.junos_package
       junipernetworks.junos.junos_package:
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
         reboot: false
-        issu: true
+        issu: false
         no_copy: true # Image already uploaded in the device
         validate: false
         force: true
@@ -83,6 +81,7 @@
       ansible.builtin.wait_for:
         timeout: 300  # Wait for up to 5 minutes
       delegate_to: localhost
+
 
   when: junos_facts.ansible_facts["ansible_net_has_2RE"]
   ignore_errors: true # You want the role to run end to end
