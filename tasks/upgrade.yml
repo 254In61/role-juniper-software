@@ -64,7 +64,8 @@
     - name: Install Junos OS package - junipernetworks.junos.junos_package
       junipernetworks.junos.junos_package:
         src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-        reboot: true
+        reboot: false
+        issu: true
         no_copy: true # Image already uploaded in the device
         validate: false
         force: true
