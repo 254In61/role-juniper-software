@@ -1,0 +1,39 @@
+---
+# Tasks to simulate upload of image
+# To be ignored once the right steps are built
+
+## Where will the image be stored? 
+## gitlab will be filled up.
+## If using a jumphost, then steps to upload to be built.
+- name: Set facts
+  ansible.builtin.set_fact:
+    sw_image_file_path: "{{ tmp_root_dir }}/{{ software_image_file_name }}"
+  delegate_to: localhost 
+  ignore_errors: true # You want the role to run end to end
+
+
+# Building a small test file to test uploads as of now.
+- name: TEST - Build a test image file
+  ansible.builtin.shell: |
+    ls -l >> {{ sw_image_file_path }}
+    ls -l >> {{ sw_image_file_path }}
+    ls -l >> {{ sw_image_file_path }}
+    ls -l >> {{ sw_image_file_path }}
+  when: test_phase
+  delegate_to: localhost
+  ignore_errors: true # You want the role to run end to end
+ 
+- name: Confirm file exists within the ansible controller
+  ansible.builtin.stat:
+    path: "{{ sw_image_file_path }}"
+  register: file_check
+  ignore_errors: true # You want the role to run end to end
+
+- name: "Assert {{ software_image_file_name }} exists on the local - FAIL Playbook if NOT existing"
+  ansible.builtin.assert:
+    that:
+      - file_check.stat.exists
+    fail_msg: "{{ software_image_file_name }} does not exist on local. Playbook stopped"
+    success_msg: "{{ software_image_file_name }} exists on local. Proceeding with the next tasks."
+  delegate_to: localhost
+  ignore_errors: true # You want the role to run end to end

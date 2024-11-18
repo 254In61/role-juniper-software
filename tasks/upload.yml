@@ -8,51 +8,9 @@
   delegate_to: localhost
   ignore_errors: true # You want the role to run end to end
 
-- name: Set facts
-  ansible.builtin.set_fact:
-    sw_image_file_path: "{{ tmp_root_dir }}/{{ git_repo_name }}/{{ vendor_dir }}/{{ software_image_file_name }}"
-  delegate_to: localhost 
-  ignore_errors: true # You want the role to run end to end
-
-## Where to find the image to upload to the Juniper device
-# Uncomment when test phase is done and the file is found in the git repo
-# - name: Clone the os images git artifacts
-#   ansible.builtin.git:
-#     repo: "{{ git_repo_url }}"
-#     dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
-#     version: "{{ git_repo_branch }}"
-#     force: yes 
-#   run_once: true
-#   environment:
-#     GIT_SSL_NO_VERIFY: "true"
-#   delegate_to: localhost 
-#   ignore_errors: true # You want the role to run end to end
-
-# Building a small test file to test uploads as of now.
-- name: TEST - Build a test image file
-  ansible.builtin.shell: |
-    ls -l >> {{ sw_image_file_path }}
-    ls -l >> {{ sw_image_file_path }}
-    ls -l >> {{ sw_image_file_path }}
-    ls -l >> {{ sw_image_file_path }}
-  when: test_phase
+- name: Import tests-upload.yml tasks
+  ansible.builtin.import_tasks: test-upload.yml
   delegate_to: localhost
-  ignore_errors: true # You want the role to run end to end
- 
-- name: Confirm file exists within the ansible controller
-  ansible.builtin.stat:
-    path: "{{ sw_image_file_path }}"
-  register: file_check
-  ignore_errors: true # You want the role to run end to end
-
-- name: "Assert {{ software_image_file_name }} exists on the local - FAIL Playbook if NOT existing"
-  ansible.builtin.assert:
-    that:
-      - file_check.stat.exists
-    fail_msg: "{{ software_image_file_name }} does not exist on local. Playbook stopped"
-    success_msg: "{{ software_image_file_name }} exists on local. Proceeding with the next tasks."
-  delegate_to: localhost
-  ignore_errors: true # You want the role to run end to end
 
 # Kept getting errors on junipernetworks.junos.package.
 # The error was: ModuleNotFoundError: No module named 'jnpr'
