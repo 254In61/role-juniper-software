@@ -52,10 +52,3 @@
 
 # Might not need this since containers are ephemeral.
 # But if testing or end up running the playbook more than once in the same container, this comes in handy
-- name: Clean up files
-  ansible.builtin.shell: |
-    cd {{ tmp_root_dir }}
-    rm -rf {{ git_repo_name }}
-  run_once: true
-  ignore_errors: true
-  delegate_to: localhost
