@@ -14,18 +14,19 @@
   delegate_to: localhost 
   ignore_errors: true # You want the role to run end to end
 
+## Where to find the image to upload to the Juniper device
 # Uncomment when test phase is done and the file is found in the git repo
-- name: Clone the os images git artifacts
-  ansible.builtin.git:
-    repo: "{{ git_repo_url }}"
-    dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
-    version: "{{ git_repo_branch }}"
-    force: yes 
-  run_once: true
-  environment:
-    GIT_SSL_NO_VERIFY: "true"
-  delegate_to: localhost 
-  ignore_errors: true # You want the role to run end to end
+# - name: Clone the os images git artifacts
+#   ansible.builtin.git:
+#     repo: "{{ git_repo_url }}"
+#     dest: "{{ tmp_root_dir }}/{{ git_repo_name }}"
+#     version: "{{ git_repo_branch }}"
+#     force: yes 
+#   run_once: true
+#   environment:
+#     GIT_SSL_NO_VERIFY: "true"
+#   delegate_to: localhost 
+#   ignore_errors: true # You want the role to run end to end
 
 # Building a small test file to test uploads as of now.
 - name: TEST - Build a test image file
