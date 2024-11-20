@@ -12,14 +12,6 @@
   register: junos_facts
   ignore_errors: true # You want the role to run end to end
 
-# - name: Display gathered Junos facts
-#   ansible.builtin.debug:
-#     var: junos_facts.ansible_facts
-
-# - name: Display ansible_net_has_2RE value
-#   ansible.builtin.debug:
-#     var: junos_facts.ansible_facts["ansible_net_has_2RE"]
-
 - name: Set PRE-UPGRADE OS Version
   ansible.builtin.set_fact:
     pre_upgrade_os_version: "{{ junos_facts.ansible_facts['ansible_net_version'] }}"
@@ -32,76 +24,43 @@
   register: file_list
   ignore_errors: true
 
-- name: Debug file_list
+# - name: Debug file_list
+#   ansible.builtin.debug:
+#     var: file_list["stdout_lines"][0]
+#   delegate_to: localhost
+#   ignore_errors: true
+
+- name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
+  ansible.builtin.assert:
+    that:
+      - software_image_file_name in file_list.stdout[0]
+    fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
+    success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
+  delegate_to: localhost
+  ignore_errors: true # You want the role to run end to end
+
+- name: Install Junos OS package - junipernetworks.junos.junos_package
+  junipernetworks.junos.junos_package:
+    src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+    reboot: true
+    issu: false
+    no_copy: true # Image already uploaded in the device
+    validate: false
+    force: true
+    provider: "{{ provider }}"
+  ignore_errors: true
+  register: sw_upgrade
+
+- name: Debug sw_upgrade output
   ansible.builtin.debug:
-    var: file_list["stdout_lines"][0]
+    var: sw_upgrade
   delegate_to: localhost
   ignore_errors: true
 
-# - name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
-#   ansible.builtin.assert:
-#     that:
-#       - software_image_file_name in file_list.stdout[0]
-#     fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
-#     success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
-#   delegate_to: localhost
-#   ignore_errors: true # You want the role to run end to end
-
-# dual routing engines
-- block:
-     # dual routing engine upgrade tasks
-     ## Need to write this logic!!
-    
-    - name: dual routing engine test task
-      ansible.builtin.debug:
-        msg:
-          - "Device has dual routing engines."
-      ignore_errors: true
-      delegate_to: localhost
-    
-    - name: Install Junos OS package - junipernetworks.junos.junos_package
-      junipernetworks.junos.junos_package:
-        src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
-        reboot: true
-        issu: false
-        no_copy: true # Image already uploaded in the device
-        validate: false
-        force: true
-        provider: "{{ provider }}"
-      ignore_errors: true
-      register: sw_upgrade
-
-    - name: Debug sw_upgrade output
-      ansible.builtin.debug:
-        var: sw_upgrade
-      delegate_to: localhost
-      ignore_errors: true
-
-    - name: Sleep for 300 seconds and continue with play
-      ansible.builtin.wait_for:
-        timeout: 300  # Wait for up to 5 minutes
-      delegate_to: localhost
-
-
-  when: junos_facts.ansible_facts["ansible_net_has_2RE"]
-  ignore_errors: true # You want the role to run end to end
-
-
-# single routing engines
-- block:
-     # single routing engine upgrade tasks
-
-    - name: single routing engine test task
-      ansible.builtin.debug:
-        msg:
-          - "Device has single routing engine."
-      ignore_errors: true
-      delegate_to: localhost
-    
-    # Software upgrade tasks to come here
-
-  when: junos_facts.ansible_facts["ansible_net_has_2RE"] == false
-  ignore_errors: true # You want the role to run end to end
+- name: Sleep for 3 minutes and continue with play
+  ansible.builtin.wait_for:
+    timeout: 180
+  delegate_to: localhost
 
 # Collect Junos facts
 - name: Gather Junos-specific facts - POST-UPGRADE
