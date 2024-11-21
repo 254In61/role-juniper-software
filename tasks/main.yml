@@ -4,3 +4,7 @@
   ansible.builtin.import_tasks: upgrade.yml
   when: upgrade
 
+- name: Import upgrade_device tasks
+  ansible.builtin.import_tasks: upload.yml
+  when: upload
+
