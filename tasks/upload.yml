@@ -2,7 +2,8 @@
 # Upload file to juniper device from Ansible Controller
 - name: "upload {{ software_image_file_name }} to {{ juniper_device_file_dir }} directory on {{ juniper_device_hostname }}"
   junipernetworks.junos.junos_scp:
-    src: "{{ tmp_root_dir }}/{{ software_image_file_name }}"
+    # src: "{{ software_image_file_source }}"
+    src: "scp://{{ artifact_host_user }}:{{ artifact_host_password }}@{{ artifact_host }}/{{ artifact_host_root_dir }}/{{ software_image_file_name }}"
     dest: "{{ juniper_device_file_dir }}"
     provider: "{{ provider }}"
 
