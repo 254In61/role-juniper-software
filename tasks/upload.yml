@@ -1,10 +1,16 @@
 ---
 # Upload file to juniper device from Ansible Controller
+- name: Debug some output
+  ansible.builtin.debug:
+    var: file_source
+  delegate_to: localhost
+
 - name: "upload {{ software_image_file_name }} to {{ juniper_device_file_dir }} directory on {{ juniper_device_hostname }}"
   junipernetworks.junos.junos_scp:
-    src: "{{ software_image_file_source }}"
+    src: "{{ file_source }}"
     dest: "{{ juniper_device_file_dir }}"
     provider: "{{ provider }}"
+  # no_log: true
 
 # A good plan, latency wise, but no module that hides scp credentials especially on fail
 # - name: Copy OS image directly from artifact server to Juniper device
