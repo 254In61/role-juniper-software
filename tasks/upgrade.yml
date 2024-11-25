@@ -57,9 +57,9 @@
   delegate_to: localhost
   ignore_errors: true
 
-- name: Sleep for 3 minutes and continue with play
+- name: Sleep for 6 minutes and continue with play
   ansible.builtin.wait_for:
-    timeout: 180
+    timeout: 360
   delegate_to: localhost
 
 # Collect Junos facts
