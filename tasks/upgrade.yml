@@ -20,7 +20,7 @@
 # Confirm image is already uploaded on the device
 - name: List files on the device
   junipernetworks.junos.junos_command:
-    commands: "file list {{ juniper_device_tmp_storage }}"
+    commands: "file list {{ juniper_device_file_dir }}"
   register: file_list
   ignore_errors: true
 
@@ -41,7 +41,7 @@
 
 - name: Install Junos OS package - junipernetworks.junos.junos_package
   junipernetworks.junos.junos_package:
-    src: "{{ juniper_device_tmp_storage }}/{{ software_image_file_name }}"
+    src: "{{ juniper_device_file_dir }}/{{ software_image_file_name }}"
     reboot: true
     issu: false
     no_copy: true # Image already uploaded in the device
