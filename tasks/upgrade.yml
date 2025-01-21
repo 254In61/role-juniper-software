@@ -47,7 +47,7 @@
     no_copy: true # Image already uploaded in the device
     validate: false
     force: true
-    provider: "{{ provider }}"
+    provider: "{{ _provider_ }}"
   ignore_errors: true
   register: sw_upgrade
 

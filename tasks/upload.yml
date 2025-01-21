@@ -6,7 +6,7 @@
     src: "{{ _software_image_file_source_ }}"
     dest: "{{ _juniper_device_file_dir_ }}"
     remote_src: false
-    provider: "{{ provider }}"
+    provider: "{{ _provider_ }}"
 
 # Confirm image is already uploaded on the device
 - name: List files on the device
