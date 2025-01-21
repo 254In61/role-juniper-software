@@ -20,7 +20,7 @@
 # Confirm image is already uploaded on the device
 - name: List files on the device
   junipernetworks.junos.junos_command:
-    commands: "file list {{ juniper_device_file_dir }}"
+    commands: "file list {{ _juniper_device_file_dir_ }}"
   register: file_list
   ignore_errors: true
 
