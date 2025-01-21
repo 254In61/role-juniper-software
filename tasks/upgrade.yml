@@ -30,18 +30,18 @@
 #   delegate_to: localhost
 #   ignore_errors: true
 
-- name: "Assert {{ software_image_file_name }} exists on the Juniper device - FAIL Playbook if NOT existing"
+- name: "Assert {{ _software_image_file_name_ }} exists on the Juniper device - FAIL Playbook if NOT existing"
   ansible.builtin.assert:
     that:
-      - software_image_file_name in file_list.stdout[0]
-    fail_msg: "{{ software_image_file_name }} does not exist on Juniper device. Playbook stopped"
-    success_msg: "{{ software_image_file_name }} exists on Juniper device. Proceeding with the next tasks."
+      - _software_image_file_name_ in file_list.stdout[0]
+    fail_msg: "{{ _software_image_file_name_ }} does not exist on Juniper device. Playbook stopped"
+    success_msg: "{{ _software_image_file_name_ }} exists on Juniper device. Proceeding with the next tasks."
   delegate_to: localhost
   ignore_errors: true # You want the role to run end to end
 
 - name: Install Junos OS package - junipernetworks.junos.junos_package
   junipernetworks.junos.junos_package:
-    src: "{{ juniper_device_file_dir }}/{{ software_image_file_name }}"
+    src: "{{ _juniper_device_file_dir_ }}/{{ _software_image_file_name_ }}"
     reboot: true
     issu: false
     no_copy: true # Image already uploaded in the device

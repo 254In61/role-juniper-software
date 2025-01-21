@@ -1,17 +1,17 @@
 ---
 # Upload file to juniper device from Ansible Controller
 
-- name: "upload {{ software_image_file_name }} to {{ juniper_device_file_dir }} directory on {{ juniper_device_hostname }}"
+- name: "upload {{ _software_image_file_name_ }} to {{ _juniper_device_file_dir_ }} directory on {{ juniper_device_hostname }}"
   junipernetworks.junos.junos_scp:
-    src: "{{ software_image_file_source }}"
-    dest: "{{ juniper_device_file_dir }}"
+    src: "{{ _software_image_file_source_ }}"
+    dest: "{{ _juniper_device_file_dir_ }}"
     remote_src: false
     provider: "{{ provider }}"
 
 # Confirm image is already uploaded on the device
 - name: List files on the device
   junipernetworks.junos.junos_command:
-    commands: "file list {{ juniper_device_file_dir }}"
+    commands: "file list {{ _juniper_device_file_dir_ }}"
   register: file_list
   ignore_errors: true
 
@@ -21,11 +21,11 @@
 #   delegate_to: localhost
 #   ignore_errors: true
 
-- name: "Assert {{ software_image_file_name }} exists on the {{ juniper_device_hostname }} - FAIL Playbook if NOT existing"
+- name: "Assert {{ _software_image_file_name_ }} exists on the {{ _juniper_device_hostname_ }} - FAIL Playbook if NOT existing"
   ansible.builtin.assert:
     that:
-      - software_image_file_name in file_list.stdout[0]
-    fail_msg: "{{ software_image_file_name }} does not exist on {{ juniper_device_hostname }}. Playbook stopped"
-    success_msg: "{{ software_image_file_name }} exists on {{ juniper_device_hostname }}. Proceeding with the next tasks."
+      - _software_image_file_name_ in file_list.stdout[0]
+    fail_msg: "{{ _software_image_file_name_ }} does not exist on {{ _juniper_device_hostname_ }}. Playbook stopped"
+    success_msg: "{{ _software_image_file_name_ }} exists on {{ _juniper_device_hostname_ }}. Proceeding with the next tasks."
   delegate_to: localhost
   ignore_errors: true # You want the role to run end to end

@@ -2,9 +2,9 @@
 # Main tasks
 - name: Import upgrade_device tasks
   ansible.builtin.import_tasks: upgrade.yml
-  when: upgrade
+  when: _upgrade_
 
 - name: Import upgrade_device tasks
   ansible.builtin.import_tasks: upload.yml
-  when: upload
+  when: _upload_
 
