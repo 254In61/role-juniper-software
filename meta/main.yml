@@ -1,5 +1,5 @@
 galaxy_info:
-  role_name: role-junos-software-upgrade
+  role_name: role-junos-software
   author: Allan Maseghe - Redhat
   description: contains tasks to perform juniper software upgrade
   license: MIT

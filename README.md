@@ -13,9 +13,6 @@ Step 3: Call the role from your playbook.
 
 # Example use
 
-## example vars file
-- See example-vars.yml
-
 ## roles consumption
 - See example-requirements.yml
 
